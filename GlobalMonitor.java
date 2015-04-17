@@ -9,6 +9,14 @@ public class GlobalMonitor {
 	private int cumulativeCost;
 	
 	
+	public int getCumulativeCost() {
+		return cumulativeCost;
+	}
+
+	public void setCumulativeCost() {
+		//this.cumulativeCost = cumulativeCost;
+	}
+
 	//Create new instance type
 	public void createVM(Instance type){
 		//specs decided on type

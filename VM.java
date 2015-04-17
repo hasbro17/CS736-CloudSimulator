@@ -10,7 +10,7 @@ public class VM {
 	//Instance specs
 	int vCPU;
 	int RAM;//units?
-	//Time steps since VM running
+	//Time steps in minutes since VM running
 	int time;
 	//Per hour cost
 	double charge;

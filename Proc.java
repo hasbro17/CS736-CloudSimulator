@@ -2,17 +2,20 @@
 //Process class
 public class Proc {
 
+		// Static PID
+		private static int PID = 1;
 		//Pid
 		private int pid;
-		//Time steps since process running
+		//Time steps in minutes since process running
 		private int time;
 		//Resource objects for memory and cpu
 		private Resource cpu;
 		private Resource mem;
 		
 		//Constructor
-		public Proc(int pid, Pattern cpuType, Pattern memType){
-			this.pid=pid;
+		public Proc(Pattern cpuType, Pattern memType){
+			this.pid=PID;
+			PID++;
 			time=0;
 			cpu = new Resource(cpuType);
 			mem = new Resource(memType);
