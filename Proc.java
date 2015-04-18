@@ -27,4 +27,21 @@ public class Proc {
 			mem.computeNextStep();
 			time++;
 		}
+		
+		//Get pid
+		public int getPID(){
+			return pid;
+		}
+		
+		//get CPU usage for proc
+		//Units:Normalized to number of vcpus
+		public double getCPUUsage(){
+			return cpu.getUsage()/(1000*1.0);
+		}
+		
+		//get Mem usage for proc
+		//Units: MBs for now
+		public double getMemUsage(){
+			return mem.getUsage();
+		}
 }

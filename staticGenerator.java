@@ -38,6 +38,7 @@ public class staticGenerator {
 	private static final double deltaFraction = 0.01;
 	private static final double initdeltaFraction = 0.1; 
 	private static final int distanceMultiplier = 500;  
+	/*
 	public static void main(String[] args) throws IOException{
 			File fout = new File("out_static.txt");
 			FileOutputStream fos = new FileOutputStream(fout);
@@ -55,5 +56,6 @@ public class staticGenerator {
 		}
 		bw.close();
 	}
+	*/
 
 }

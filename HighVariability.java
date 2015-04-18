@@ -57,7 +57,9 @@ public class HighVariability {
 	private static final double initialDeltaFraction = 0.1;  
 	private static final int distanceMultiplier = 800;
 	private static final int counterInit = 15;  
-	private static final int meanBound = 40; // all means will be within 40% of original mean  
+	private static final int meanBound = 40; // all means will be within 40% of original mean 
+	
+	/*
 	public static void main(String[] args) throws IOException {
 			File fout = new File("out_high.txt");
 			FileOutputStream fos = new FileOutputStream(fout);
@@ -76,5 +78,6 @@ public class HighVariability {
 		}
 		bw.close();
 	}
+	*/
 
 }

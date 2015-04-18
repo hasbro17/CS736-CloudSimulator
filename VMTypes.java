@@ -2,7 +2,7 @@ public class VMTypes {
 	private String type;
 	private int vcpu;
 	private int memory;
-	private int hourlyRate;
+	private double hourlyRate;
 
 
 	//constructor
@@ -10,6 +10,23 @@ public class VMTypes {
 		this.type = type;
 		this.vcpu = Integer.parseInt(vcpu);
 		this.memory = Integer.parseInt(memory);
-		this.hourlyRate = Integer.parseInt(hourlyRate);
+		this.hourlyRate = Double.parseDouble(hourlyRate);
 	}
+	
+	public String getType(){
+		return type;
+	}
+	
+	public int getVCPU(){
+		return vcpu;
+	}
+	
+	public int getMemory(){
+		return memory;
+	}
+	
+	public double getHourlyRate(){
+		return hourlyRate;
+	}
+	
 }

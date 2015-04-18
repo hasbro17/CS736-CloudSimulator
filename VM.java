@@ -2,55 +2,124 @@ import java.util.ArrayList;
 
 //VM Class responsible for running a set of processes and reporting usage statistics
 public class VM {
-	
+
+	//Static VMID
+	private static int VMID=1;
 	//unique VM ID
-	int vmID;
+	private int vmID;
 	//List of processes
-	ArrayList<Proc> processes;
+	private ArrayList<Proc> procs;
 	//Instance specs
-	int vCPU;
-	int RAM;//units?
+	private int vCPU;
+	private int RAM;//units: GBs
 	//Time steps in minutes since VM running
-	int time;
+	private int time;
 	//Per hour cost
-	double charge;
-	
+	private double hourlyRate;
+	//Instance name
+	private String instanceName;
+
 	//constructor
-	public VM(int vCPU, int RAM, double charge){
+	public VM(int vCPU, int RAM, double hourlyRate, String instanceName){
 		this.vCPU=vCPU;
 		this.RAM=RAM;
-		this.charge=charge;
+		this.hourlyRate=hourlyRate;
+		this.instanceName=instanceName;
+		procs=new ArrayList<Proc>();
+		vmID=VMID;
+		VMID++;
 	}
-	
+
 	//Compute one time step for all procs
-	public void computeNextStep(){
-		for (Proc proc : processes) {
+	//Returns cost increment for this step
+	public double computeNextStep(){
+		for (Proc proc : procs) {
 			proc.computeNextStep();
 		}
+		time++;
+		return hourlyRate/(60*1.0);
 	}
-	
-	//Add process to VM
+
+	//Get instance name
+	public String getInstanceName(){
+		return instanceName;
+	}
+
+	//Get vmID
+	public int getVMID(){
+		return vmID;
+	}
+
+	//Get number of procs
+	public int getNumProcs(){
+		return procs.size();
+	}
+
+	//Add process to VM, add to sorted lists as well
 	public void addProc(Proc proc){
-		processes.add(proc);
+		procs.add(proc);
 	}
 	
+	public Proc removeProc(int pid){
+		Proc toRemove=null;
+		for(int i=0; i<procs.size(); i++)
+		{
+			if(procs.get(i).getPID()==pid){
+				toRemove=procs.remove(i);
+			}
+		}
+		return toRemove;
+	}
+
 	//Get Cost of VM since creation
 	double getTotalCost(){
-		return charge*(time/60);
+		return hourlyRate*(time*1.0/60);
 	}
-	
-	//Question:How does the vcpu and RAM numbers link with the percent utilization of the processes?
-	//Resource usage is in percent.
+
+	//Memory usage as a fraction of total RAM.
 	double getMemUtil(){
-		return 0;
+		double totalProcUsage=0;
+		for (Proc proc : procs) {
+			totalProcUsage+=proc.getMemUsage();
+		}
+		return (totalProcUsage)/(RAM*1024*1.0);
 	}
-	
+
+	//CpuUsage as a fraction of total cores
 	double getCPUUtil(){
-		return 0;
+		double totalProcUsage=0;
+		for (Proc proc : procs) {
+			totalProcUsage+=proc.getCPUUsage();
+		}
+		return (totalProcUsage)/(vCPU*1.0);
 	}
+
+	//The ordered lists allow policy to get min max and anything in between
+	//Can change to getMax and getMin methods if thats all thats needed later
 	
-	
-	
-	
+	//Get an array list of procs sorted(ascending) by their fractional cpu usage
+	ArrayList<Proc> getCPUOrderedProcs(){
+		ArrayList<Proc> cpuOrdered = new ArrayList<Proc>();
+		//Insertion sort
+		for (Proc proc : procs) {
+			int i=0;
+			while(i<cpuOrdered.size() && proc.getCPUUsage()>=cpuOrdered.get(i).getCPUUsage())
+				i++;
+			cpuOrdered.add(i, proc);
+		}
+		return cpuOrdered;
+	}
+
+	//Get an array list of procs sorted(ascending) by their memory usage
+	ArrayList<Proc> getMemOrderedProcs(){
+		ArrayList<Proc> memOrdered = new ArrayList<Proc>();
+		for (Proc proc : procs) {
+			int i=0;
+			while(i<memOrdered.size() && proc.getMemUsage()>=memOrdered.get(i).getMemUsage())
+				i++;
+			memOrdered.add(i, proc);
+		}
+		return memOrdered;
+	}
 
 }

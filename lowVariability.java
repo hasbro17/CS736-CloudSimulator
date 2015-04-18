@@ -65,6 +65,7 @@ public class lowVariability {
 	private static final int distanceMultiplier = 800;
 	private static final int counterInit = 40;  
 	private static final int meanBound = 30; // all means will be within 40% of original mean  
+	/*
 	public static void main(String[] args) throws IOException {
 			File fout = new File("out_low.txt");
 			FileOutputStream fos = new FileOutputStream(fout);
@@ -83,5 +84,6 @@ public class lowVariability {
 		}
 		bw.close();
 	}
+	*/
 
 }
