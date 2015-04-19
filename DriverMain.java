@@ -12,6 +12,7 @@ public class DriverMain {
 	private static ArrayList<VMTypes> rate = new ArrayList<VMTypes>();
 	private static Random randomGen = new Random();//random generator for workloads
 
+	//Initialize VM instance types
 	public static void initVMTypes(String filename){
 		//init dictionary
 		try {
@@ -48,16 +49,14 @@ public class DriverMain {
 	
 
 	public static void main(String[] args) {
-		int minBuffer=30;
-		int maxBuffer=100;
-		int nextArrival=randomGen.nextInt(minBuffer)+maxBuffer;
-		int maxProcesses=50;
 		
+		//initialize ProcSpawn object and use that in while loop to generate new processes
 		
-		//List of VM types ready
+		//List of VM types ready for policy to use
 		initVMTypes("vmTypes");
 		
 		//Initialize policy object
+		//HERE
 		
 		GlobalMonitor global = new GlobalMonitor();
 		

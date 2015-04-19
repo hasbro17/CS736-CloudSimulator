@@ -38,11 +38,11 @@ public class Resource {
 	//Compute, update and return the new currentUsage
 	public double computeNextStep(){
 		//Change in usage based on type
-		if(type.equals(Pattern.FastMoving))
+		if(type.equals(Pattern.Fast))
 		{
 			currentUsage=highGen.generator();
 		}
-		else if (type.equals(Pattern.SlowMoving)) 
+		else if (type.equals(Pattern.Slow)) 
 		{
 			currentUsage=lowGen.generator();
 		}
