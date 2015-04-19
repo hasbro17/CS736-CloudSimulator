@@ -122,4 +122,14 @@ public class VM {
 		return memOrdered;
 	}
 
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
+		for (Proc proc:procs) {
+			result.append("PID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n");
+		}
+
+		return result.toString();
+	}
+
 }
