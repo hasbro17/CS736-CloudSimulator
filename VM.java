@@ -122,6 +122,16 @@ public class VM {
 		return cpuOrdered;
 	}
 
+	public String toString() {
+		StringBuilder result = new StringBuilder();
+		result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
+		for (Proc proc:procs) {
+			result.append("PID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n");
+		}
+
+		return result.toString();
+	}
+	
 	//Get an array list of procs sorted(ascending) by their memory usage
 	ArrayList<Proc> getMemOrderedProcs(){
 		ArrayList<Proc> memOrdered = new ArrayList<Proc>(procs);

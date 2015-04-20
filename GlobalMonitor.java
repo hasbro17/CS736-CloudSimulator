@@ -73,6 +73,11 @@ public class GlobalMonitor {
 		localMonitors.add(vm);
 	}
 
+	
+	
+	
+	
+	
 	//remove VM, return false if not found. 
 	public boolean removeVM(int vmID){
 		boolean removed=false;
