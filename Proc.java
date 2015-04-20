@@ -13,7 +13,7 @@ public class Proc {
 		private Resource mem;
 		
 		//Constructor
-		public Proc(Pattern cpuType, Pattern memType){
+		public Proc(String cpuTypeFile, String memTypeFile){
 			this.pid=PID;
 			PID++;
 			time=0;
