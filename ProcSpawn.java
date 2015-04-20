@@ -1,46 +1,25 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Random;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
 //Class to spawn new processes either randomly based on some parameters, or read a file to generate a previous trace of spawns
 public class ProcSpawn {
 
-	int minBuffer=30;
-	int maxBuffer=100;
-	int numProcs=50;
-	Random randomGen=new Random();
-	Pattern[] types=Pattern.values();
-	
-	boolean typeRandom;//true random and false file
-	
 	int nextArrival;//time till arrival of next process
-	String outputFile="ProcGenLog";//output file
-	
+	ArrayList<Proc> nextSet;//Next process spawned after delay done
+	ArrayList<Proc> allProcs;//All procs read from file
+	ArrayList<Integer> delays;//delay time for each process in sequence from previous
 	Scanner fileIn=null;
-	Scanner fileOut=null;
-	
-	
-	//Constructor for randomized generation
-	public ProcSpawn(int minBuffer, int maxBuffer, int numProcs){
-		this.minBuffer=minBuffer;
-		this.maxBuffer=maxBuffer;
-		this.numProcs=numProcs;
-		typeRandom=true;
-		
-		File file = new File(outputFile);
-		try {
-			fileOut=new Scanner(file);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Could not open Process Log File: "+outputFile);
-			e.printStackTrace();
-		}
-		
-	}
-	
+	boolean done=false;//true when no more procs left
+	int currIndex;//index of next process to spawn
+
 	//Constructor for predetermined generation using file
+	//File Format:Every line is a process with three attributes
+	//<DELAY> <cpuTraceFile> <memTraceFile>
+	//Delay is delay until this process is generated after the last one.
+	//Consecutive processes with 0 delay are generated at together at the next call
 	public ProcSpawn(String fileName){
 		//open file and read all the procs in
 		File file = new File(fileName);
@@ -51,42 +30,81 @@ public class ProcSpawn {
 			System.out.println("Could not open Process File: "+fileName);
 			e.printStackTrace();
 		}
+		//Read all procs in
+		readAllProcs();
+		//Initialize first set of procs and delay
+		genNextSet();
 	}
-	
-	//Spawn new proc and return proc
+
+	//Return current set of procs, setup next set of procs and their delay
 	//Return null if there are no more procs to be spawned
-	public Proc spawnNewProc(){
-		Proc newProc = null;
-		//Get new Proc parameters
-		if(typeRandom)
-		{
-			//If random generation
-			nextArrival=randomGen.nextInt(minBuffer)+maxBuffer;
-			//Process mem and cpu type randomly chosen
-			newProc = new Proc(types[randomGen.nextInt(types.length)], types[randomGen.nextInt(types.length)]);
-		}
-		else
-		{
-			if(fileIn.hasNextLine())
-			{
-				String[]procAttrs=fileIn.nextLine().split("\\s+");
-				if(procAttrs.length==)
-			}
-		}
-		
+	//Should only be called when checkTime returns 0
+	public ArrayList<Proc> spawnNextSet(){
+		//To return
+		ArrayList<Proc> currentSet=nextSet;
+		//refresh and generate nextSet and set delay
+		genNextSet();
 		//Generate Proc and return
-		return newProc;
-		
+		return currentSet;
 	}
-		
+
 	//Decrement and check time until next process spawn
 	//When zero you can call spawnNewProc
 	public int checkTime(){
-		return 0;
+		if(nextArrival>0)
+			nextArrival--;
+		return nextArrival;
 	}
 	
-	//Logs new process creation, time and type to a file which can be read next time
-	public void logToFile(){
-		
+	//To check if no more processes left
+	public boolean isDone(){
+		return done;
+	}
+
+	//Generate next set of processes
+	private void genNextSet(){
+		nextSet= new ArrayList<Proc>();
+		if(!done)//still atleas one proc remaining
+		{
+			//add next process
+			nextSet.add(allProcs.get(currIndex));
+			nextArrival=delays.get(currIndex);
+			currIndex++;
+			//add remaining consecutive procs with 0 delay
+			while(currIndex<allProcs.size() && delays.get(currIndex)==0)
+			{
+				nextSet.add(allProcs.get(currIndex));
+				nextArrival=delays.get(currIndex);
+				currIndex++;
+			}
+			//Set done to true if no more procs left
+			if(currIndex==allProcs.size())
+				done=true;
+		}
+	}
+
+	//Read next line and set arrival and proc
+	private void readAllProcs(){
+		int delay=0;
+		while(fileIn.hasNextLine())
+		{
+			String[] procAttrs=fileIn.nextLine().split("\\s+");//whitespace delimited
+			if(procAttrs.length!=3){
+				System.out.println("Proc file format issue");
+			}
+			else
+			{
+				try{
+					delay=Integer.parseInt(procAttrs[0]);
+					//Create next proc with usage trace files
+					delays.add(nextArrival);
+					allProcs.add(new Proc(procAttrs[1], procAttrs[2]));
+				}catch(NumberFormatException e){
+					System.out.println("Proc file format issue");
+				}
+			}
+
+		}
+
 	}
 }
