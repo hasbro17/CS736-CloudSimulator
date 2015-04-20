@@ -75,5 +75,16 @@ public class GlobalMonitor {
 		
 		return true;
 	}
+	
+	public String toString() {
+		String result = "";
+		result+="=================================================\n";
+		result+="Global State at" + " time : " /*+ this.time*/ + "total cost" + totalCost + "\n";
+		for (VM vm:localMonitors) {
+			result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";
+		}
+		result+="=================================================\n";
+		return result.toString();
+	}
 
 }

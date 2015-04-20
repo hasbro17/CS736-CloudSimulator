@@ -123,12 +123,14 @@ public class VM {
 	}
 
 	public String toString() {
-		StringBuilder result = new StringBuilder();
-		result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
+		String result = "";
+		result+="=================================================\n";
+		result+="VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n";
+		//result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
 		for (Proc proc:procs) {
-			result.append("PID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n");
+			result+="\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
 		}
-
+		result+="=================================================\n";
 		return result.toString();
 	}
 
