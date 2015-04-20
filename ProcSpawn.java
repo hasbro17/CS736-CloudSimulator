@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
-//Class to spawn new processes either randomly based on some parameters, or read a file to generate a previous trace of spawns
+//Class to spawn new processes in a sequence read from a file
 public class ProcSpawn {
 
-	int nextArrival;//time till arrival of next process
-	ArrayList<Proc> nextSet;//Next process spawned after delay done
-	ArrayList<Proc> allProcs;//All procs read from file
-	ArrayList<Integer> delays;//delay time for each process in sequence from previous
-	Scanner fileIn=null;
-	boolean done=false;//true when no more procs left
-	int currIndex;//index of next process to spawn
+	private int nextArrival;//time till arrival of next process
+	private ArrayList<Proc> nextSet;//Next process spawned after delay done
+	private ArrayList<Proc> allProcs;//All procs read from file
+	private ArrayList<Integer> delays;//delay time for each process in sequence from previous
+	private Scanner fileIn=null;
+	private boolean empty=false;//true when no more procs left
+	private int currIndex;//index of next process to spawn
 
 	//Constructor for predetermined generation using file
 	//File Format:Every line is a process with three attributes
@@ -50,21 +50,35 @@ public class ProcSpawn {
 
 	//Decrement and check time until next process spawn
 	//When zero you can call spawnNewProc
-	public int checkTime(){
+	public int checkNextArrivalTime(){
 		if(nextArrival>0)
 			nextArrival--;
 		return nextArrival;
 	}
 	
 	//To check if no more processes left
-	public boolean isDone(){
-		return done;
+	public boolean isEmpty(){
+		return empty;
+	}
+	
+	//To check if all processes finished their usage trace files
+	//End of simulation
+	public boolean allFinished(){
+		//No more procs left to spawn
+		if(!isEmpty())
+			return false;
+		//All traces complete
+		for (Proc proc : allProcs) {
+			if(!proc.isFinished())
+				return false;
+		}
+		return true;
 	}
 
-	//Generate next set of processes
+	//Generate next set of processes, returns false if no more procs left
 	private void genNextSet(){
 		nextSet= new ArrayList<Proc>();
-		if(!done)//still atleas one proc remaining
+		if(currIndex==allProcs.size())//still atleast one proc remaining
 		{
 			//add next process
 			nextSet.add(allProcs.get(currIndex));
@@ -74,13 +88,11 @@ public class ProcSpawn {
 			while(currIndex<allProcs.size() && delays.get(currIndex)==0)
 			{
 				nextSet.add(allProcs.get(currIndex));
-				nextArrival=delays.get(currIndex);
 				currIndex++;
 			}
-			//Set done to true if no more procs left
-			if(currIndex==allProcs.size())
-				done=true;
 		}
+		else//no procs left
+			empty=true;
 	}
 
 	//Read next line and set arrival and proc

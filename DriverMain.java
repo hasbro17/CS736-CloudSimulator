@@ -20,6 +20,11 @@ public class DriverMain {
 			String line;
 			while ((line = br.readLine()) != null) {
 				String[] split = line.split(",");
+				if(split.length!=4)
+				{
+					System.out.println("VMTypes format incorrect");
+					System.exit(0);
+				}
 				VMTypes vm = new VMTypes(split[0], split[1], split[2], split[3]);
 				VMDictionary.add(vm);
 			}
@@ -50,31 +55,40 @@ public class DriverMain {
 
 	public static void main(String[] args) {
 		
+		String procSpawnFile="procSpawnFile";
 		//initialize ProcSpawn object and use that in while loop to generate new processes
+		ProcSpawn procSpawn = new ProcSpawn("procSpawnFile.txt");
 		
 		//List of VM types ready for policy to use
-		initVMTypes("vmTypes");
+		initVMTypes("vmTypes.txt");
 		
-		//Initialize policy object
-		//HERE
+		//Create policy object
+		//Policy policy = new Policy();
 		
 		GlobalMonitor global = new GlobalMonitor();
 		
-		//Initial conditions
-		//Num of VMs
-		//No processes spawned yet
+		//Initialize global state, using policy object
+		//policy.init(global)
 		
-		//Main simulation loop
-		while(//simulation time)
+		//Main simulation loop, runs until all processes reach end of their trace files
+		while(!procSpawn.allFinished())
 		{
+			//Decrement and check next arrival time
+			//Get new processes if available
+			if(procSpawn.checkNextArrivalTime()==0){
+				//Get new procs
+				ArrayList<Proc> newProcs = procSpawn.spawnNextSet();
+				//policy allocates newProcs to VMs
+				//policy.allocateProcs(global, newProcs)
+			}
+			
 			//Execute one cycle of global monitor
 			global.computeNextStep();
 			
-			//Policy to adjust VM's or procs
+			//Policy to adjust global state
+			//policy.adjust(global)
 			
 		}
-		
-		
 	
 	}
 

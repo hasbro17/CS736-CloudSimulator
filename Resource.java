@@ -1,12 +1,55 @@
-import java.util.Random;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 //Generic Resource Class capable of 3 types of usage patterns
+//Now a glorified file reader :/
 public class Resource {
-	
-	//Mean usage
-	private double mean;
+
 	//Current usage
 	private double currentUsage;
+	private Scanner scnr;
+	//true when process trace finishes from file, signal for VM to remove it
+	private boolean finished;
+
+	public Resource(String fileName){
+		File file = new File(fileName);
+		try {
+			scnr=new Scanner(file);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Could not find resource file: "+fileName);
+			e.printStackTrace();
+		}
+	}
+
+	//Update usage by reading in next usage from file
+	//new line means finished
+	public double computeNextStep(){
+		if(scnr.hasNextLine()){
+			currentUsage=scnr.nextDouble();
+			scnr.nextLine();//clear line
+		}
+		else{//trace finished
+			finished=true;
+		}
+		return currentUsage;
+	}
+	
+	//Returns raw usage number of resource
+	public double getUsage(){
+		return currentUsage;
+	}
+	
+	//To check if process finished
+	public boolean isFinished(){
+		return finished;
+	}
+
+	//Deprecated random generation
+	/*	
+	//Mean usage
+	private double mean;
 	//Type of usage pattern
 	private Pattern type;
 	//Generator types
@@ -15,7 +58,7 @@ public class Resource {
 	private staticGenerator staticGen;
 	//Random Generator for mean
 	private Random randomGen= new Random();
-	
+
 	//Random mean resource usage between 1-1000
 	public Resource(Pattern type){
 		this.type=type;
@@ -24,7 +67,7 @@ public class Resource {
 		lowGen = new lowVariability(mean);
 		staticGen = new staticGenerator(mean);
 	}
-	
+
 	//Set specified mean
 	public Resource(Pattern type, int mean){
 		this.type=type;
@@ -33,8 +76,8 @@ public class Resource {
 		lowGen = new lowVariability(mean);
 		staticGen = new staticGenerator(mean);
 	}
-	
-	
+
+
 	//Compute, update and return the new currentUsage
 	public double computeNextStep(){
 		//Change in usage based on type
@@ -52,10 +95,7 @@ public class Resource {
 		}
 		return currentUsage;
 	}
-	
-	//Returns raw usage number of resource
-	public double getUsage(){
-		return currentUsage;
-	}
-	
+
+
+	 */
 }

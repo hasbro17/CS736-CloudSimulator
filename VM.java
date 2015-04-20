@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 //VM Class responsible for running a set of processes and reporting usage statistics
 public class VM {
@@ -29,6 +31,8 @@ public class VM {
 		vmID=VMID;
 		VMID++;
 	}
+	
+	//To mark simulation end, all procs finished
 
 	//Compute one time step for all procs
 	//Returns cost increment for this step
@@ -59,13 +63,16 @@ public class VM {
 	public void addProc(Proc proc){
 		procs.add(proc);
 	}
-	
+
+	//Remove a processes from this vm
+	//Return null if not found
 	public Proc removeProc(int pid){
 		Proc toRemove=null;
 		for(int i=0; i<procs.size(); i++)
 		{
 			if(procs.get(i).getPID()==pid){
 				toRemove=procs.remove(i);
+				break;
 			}
 		}
 		return toRemove;
@@ -76,60 +83,94 @@ public class VM {
 		return hourlyRate*(time*1.0/60);
 	}
 
-	//Memory usage as a fraction of total RAM.
-	double getMemUtil(){
+	//Raw memory usage of all processes in VM
+	double getRawMemUtil(){
 		double totalProcUsage=0;
 		for (Proc proc : procs) {
 			totalProcUsage+=proc.getMemUsage();
 		}
-		return (totalProcUsage)/(RAM*1024*1.0);
+		return totalProcUsage;
 	}
 
-	//CpuUsage as a fraction of total cores
-	double getCPUUtil(){
+	//Fractional memory usage of RAM in VM.
+	public double getMemUtil(){
+		return (getRawMemUtil())/(RAM*1024*1.0);
+	}
+
+	//Raw cpu usage of all processes in VM
+	public double getRawCPUUtil(){
 		double totalProcUsage=0;
 		for (Proc proc : procs) {
 			totalProcUsage+=proc.getCPUUsage();
 		}
-		return (totalProcUsage)/(vCPU*1.0);
+		return totalProcUsage;
+	}
+
+	//Fractional CpuUsage of all cores in VM
+	double getCPUUtil(){
+
+		return (getRawCPUUtil())/(vCPU*1.0);
 	}
 
 	//The ordered lists allow policy to get min max and anything in between
 	//Can change to getMax and getMin methods if thats all thats needed later
-	
+
 	//Get an array list of procs sorted(ascending) by their fractional cpu usage
 	ArrayList<Proc> getCPUOrderedProcs(){
-		ArrayList<Proc> cpuOrdered = new ArrayList<Proc>();
-		//Insertion sort
-		for (Proc proc : procs) {
-			int i=0;
-			while(i<cpuOrdered.size() && proc.getCPUUsage()>=cpuOrdered.get(i).getCPUUsage())
-				i++;
-			cpuOrdered.add(i, proc);
-		}
+		ArrayList<Proc> cpuOrdered = new ArrayList<Proc>(procs);
+		Collections.sort(cpuOrdered, Proc.cpuCompare);
 		return cpuOrdered;
 	}
 
 	//Get an array list of procs sorted(ascending) by their memory usage
 	ArrayList<Proc> getMemOrderedProcs(){
-		ArrayList<Proc> memOrdered = new ArrayList<Proc>();
-		for (Proc proc : procs) {
-			int i=0;
-			while(i<memOrdered.size() && proc.getMemUsage()>=memOrdered.get(i).getMemUsage())
-				i++;
-			memOrdered.add(i, proc);
-		}
+		ArrayList<Proc> memOrdered = new ArrayList<Proc>(procs);
+		Collections.sort(memOrdered, Proc.memCompare);
 		return memOrdered;
 	}
 
-	public String toString() {
-		StringBuilder result = new StringBuilder();
-		result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
-		for (Proc proc:procs) {
-			result.append("PID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n");
-		}
 
-		return result.toString();
-	}
+
+	//VM Comparators used for VM sorting
+
+	//Comparator for rawCPU order
+	public static Comparator<VM> rawCPUCompare = new Comparator<VM>() {
+		public int compare(VM v1, VM v2){
+			if(v1.getRawCPUUtil()==v2.getRawCPUUtil())
+				return 0;
+			else
+				return v1.getRawCPUUtil()>v2.getRawCPUUtil() ? 1:-1;
+		}
+	};
+
+	//Comparator for rawMem order
+	public static Comparator<VM> rawMemCompare = new Comparator<VM>() {
+		public int compare(VM v1, VM v2){
+			if(v1.getRawMemUtil()==v2.getRawMemUtil())
+				return 0;
+			else
+				return v1.getRawMemUtil()>v2.getRawMemUtil() ? 1:-1;
+		}
+	};
+
+	//Comparator for percent CPU utilization order
+	public static Comparator<VM> cpuCompare = new Comparator<VM>() {
+		public int compare(VM v1, VM v2){
+			if(v1.getCPUUtil()==v2.getCPUUtil())
+				return 0;
+			else
+				return v1.getCPUUtil()>v2.getCPUUtil() ? 1:-1;
+		}
+	};
+
+	//Comparator for percent Mem utilization order
+	public static Comparator<VM> memCompare = new Comparator<VM>() {
+		public int compare(VM v1, VM v2){
+			if(v1.getMemUtil()==v2.getMemUtil())
+				return 0;
+			else
+				return v1.getMemUtil()>v2.getMemUtil() ? 1:-1;
+		}
+	};
 
 }
