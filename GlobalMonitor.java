@@ -72,11 +72,6 @@ public class GlobalMonitor {
 		VM vm = new VM(vmType.getVCPU(), vmType.getMemory(), vmType.getHourlyRate(), vmType.getType());
 		localMonitors.add(vm);
 	}
-
-	
-	
-	
-	
 	
 	//remove VM, return false if not found. 
 	public boolean removeVM(int vmID){

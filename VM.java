@@ -121,18 +121,6 @@ public class VM {
 		Collections.sort(cpuOrdered, Proc.cpuCompare);
 		return cpuOrdered;
 	}
-
-	public String toString() {
-		String result = "";
-		result+="=================================================\n";
-		result+="VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n";
-		//result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
-		for (Proc proc:procs) {
-			result+="\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
-		}
-		result+="=================================================\n";
-		return result.toString();
-	}
 	
 	//Get an array list of procs sorted(ascending) by their memory usage
 	ArrayList<Proc> getMemOrderedProcs(){
@@ -140,8 +128,6 @@ public class VM {
 		Collections.sort(memOrdered, Proc.memCompare);
 		return memOrdered;
 	}
-
-
 
 	//VM Comparators used for VM sorting
 
@@ -184,5 +170,17 @@ public class VM {
 				return v1.getMemUtil()>v2.getMemUtil() ? 1:-1;
 		}
 	};
+	
+	public String toString() {
+		String result = "";
+		result+="=================================================\n";
+		result+="VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n";
+		//result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
+		for (Proc proc:procs) {
+			result+="\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
+		}
+		result+="=================================================\n";
+		return result.toString();
+	}
 
 }
