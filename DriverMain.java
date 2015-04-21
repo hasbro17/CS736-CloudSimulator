@@ -1,7 +1,11 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 //Tester class for cloud simulation
 public class DriverMain {
@@ -11,7 +15,8 @@ public class DriverMain {
 	private static ArrayList<VMTypes> mem = new ArrayList<VMTypes>();
 	private static ArrayList<VMTypes> rate = new ArrayList<VMTypes>();
 	private static Random randomGen = new Random();//random generator for workloads
-
+	
+	
 	//Initialize VM instance types
 	public static void initVMTypes(String filename){
 		//init dictionary
@@ -55,12 +60,30 @@ public class DriverMain {
 
 	public static void main(String[] args) {
 		
+		//init Logger
+		
+		Logger logger = Logger.getLogger("DriverLog");
+		FileHandler fh;
+		SimpleFormatter formatter = new SimpleFormatter();
+		try {
+			fh  = new FileHandler("./DriverLog.log");
+			fh.setFormatter(formatter);
+			logger.addHandler(fh);
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		String procSpawnFile="procSpawnFile";
 		//initialize ProcSpawn object and use that in while loop to generate new processes
 		ProcSpawn procSpawn = new ProcSpawn("procSpawnFile.txt");
 		
 		//List of VM types ready for policy to use
 		initVMTypes("vmTypes.txt");
+		logger.info("initVMTypes done!");
 		
 		//Create policy object
 		//Policy policy = new Policy();
@@ -84,9 +107,10 @@ public class DriverMain {
 			
 			//Execute one cycle of global monitor
 			global.computeNextStep();
-			
+			logger.info(global.toString());
 			//Policy to adjust global state
 			//policy.adjust(global)
+			//logger.info(policy.toString());
 			
 		}
 	
