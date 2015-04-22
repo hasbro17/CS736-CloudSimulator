@@ -28,6 +28,7 @@ public class DriverMain {
 				VMTypes vm = new VMTypes(split[0], split[1], split[2], split[3]);
 				VMDictionary.add(vm);
 			}
+			br.close();
 		}
 		catch ( Exception e) {
 			System.out.println(e.getMessage());
@@ -55,7 +56,6 @@ public class DriverMain {
 
 	public static void main(String[] args) {
 		
-		String procSpawnFile="procSpawnFile";
 		//initialize ProcSpawn object and use that in while loop to generate new processes
 		ProcSpawn procSpawn = new ProcSpawn("procSpawnFile.txt");
 		
@@ -69,6 +69,7 @@ public class DriverMain {
 		
 		//Initialize global state, using policy object
 		//policy.init(global)
+		//Might not need init, we can start off with 1 smallest vm
 		
 		//Main simulation loop, runs until all processes reach end of their trace files
 		while(!procSpawn.allFinished())

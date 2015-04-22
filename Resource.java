@@ -32,6 +32,7 @@ public class Resource {
 		}
 		else{//trace finished
 			finished=true;
+			currentUsage=0;//process usage finishes, no load
 		}
 		return currentUsage;
 	}
