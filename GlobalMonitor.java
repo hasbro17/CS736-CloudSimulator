@@ -13,6 +13,8 @@ public class GlobalMonitor {
 	//Total cost accumulated from running VM's since beginning
 	private int totalCost;
 	private int numMigrations;
+	//Time steps in minutes since VM running
+	private int time;
 	
 	private Logger logger = Logger.getLogger("GlobalMonitorLog");
 	FileHandler fh;
@@ -45,6 +47,7 @@ public class GlobalMonitor {
 		for (VM vm : localMonitors) {
 			totalCost+=vm.computeNextStep();
 		}
+		time++;
 	}
 
 	/////Methods to observe Global State/////
@@ -144,7 +147,7 @@ public class GlobalMonitor {
 	public String toString() {
 		String result = "";
 		result+="=================================================\n";
-		result+="Global State at" + " time : " /*+ this.time*/ + " total cost : " + totalCost + " migrations : " + numMigrations + "\n";
+		result+="Global State at" + " time : " + this.time + " total cost : " + totalCost + " migrations : " + numMigrations + "\n";
 		for (VM vm:localMonitors) {
 			result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";
 		}
