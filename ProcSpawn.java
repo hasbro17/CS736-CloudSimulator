@@ -1,11 +1,51 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 
 //Class to spawn new processes in a sequence read from a file
 public class ProcSpawn {
+
+	//Test ProcSpawn
+	/*
+	public static void main(String[] args) throws IOException{
+		
+		File fout = new File("procSpawnTest.txt");
+		FileOutputStream fos = new FileOutputStream(fout);
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+		
+		ArrayList<Proc> procsGenerated = new ArrayList<Proc>();
+		ProcSpawn procSpawn = new ProcSpawn("procSpawnFile.txt");
+		int step=1;
+		
+		while(!procSpawn.allFinished()){
+			bw.write("Step:"+step+"\n");
+			if(!procSpawn.isEmpty() && procSpawn.checkNextArrivalTime()==0){
+				ArrayList<Proc> newProcs = procSpawn.spawnNextSet();
+				procsGenerated.addAll(newProcs);
+				bw.write("Procs generated: ");
+				for (Proc proc : newProcs) {
+					bw.write(proc.getPID()+" ");
+				}
+				bw.write("\n");
+			}
+			bw.write("Usage Stats:\n");
+			for (Proc proc : procsGenerated) {
+				proc.computeNextStep();
+				bw.write("Pid:"+proc.getPID()+" usage:"+proc.getMemUsage()+"\n");
+			}
+			step++;
+			bw.write("\n\n");
+			
+		}
+		bw.close();
+	}
+	*/
 
 	private int nextArrival;//time till arrival of next process
 	private ArrayList<Proc> nextSet;//Next process spawned after delay done
@@ -21,6 +61,12 @@ public class ProcSpawn {
 	//Delay is delay until this process is generated after the last one.
 	//Consecutive processes with 0 delay are generated at together at the next call
 	public ProcSpawn(String fileName){
+		
+		//initialize lists
+		allProcs= new ArrayList<Proc>();
+		delays= new ArrayList<Integer>();
+		nextSet= new ArrayList<Proc>();
+		
 		//open file and read all the procs in
 		File file = new File(fileName);
 		try {
@@ -29,6 +75,7 @@ public class ProcSpawn {
 			// TODO Auto-generated catch block
 			System.out.println("Could not open Process File: "+fileName);
 			e.printStackTrace();
+			System.exit(0);
 		}
 		//Read all procs in
 		readAllProcs();
@@ -41,7 +88,7 @@ public class ProcSpawn {
 	//Should only be called when checkTime returns 0
 	public ArrayList<Proc> spawnNextSet(){
 		//To return
-		ArrayList<Proc> currentSet=nextSet;
+		ArrayList<Proc> currentSet= new ArrayList<Proc>(nextSet);
 		//refresh and generate nextSet and set delay
 		genNextSet();
 		//Generate Proc and return
@@ -75,10 +122,10 @@ public class ProcSpawn {
 		return true;
 	}
 
-	//Generate next set of processes, returns false if no more procs left
+	//Generate next set of processes, sets empty to true when no more procs left to spawn
 	private void genNextSet(){
 		nextSet= new ArrayList<Proc>();
-		if(currIndex==allProcs.size())//still atleast one proc remaining
+		if(currIndex<allProcs.size())//still atleast one proc remaining
 		{
 			//add next process
 			nextSet.add(allProcs.get(currIndex));
@@ -109,7 +156,7 @@ public class ProcSpawn {
 				try{
 					delay=Integer.parseInt(procAttrs[0]);
 					//Create next proc with usage trace files
-					delays.add(nextArrival);
+					delays.add(delay);
 					allProcs.add(new Proc(procAttrs[1], procAttrs[2]));
 				}catch(NumberFormatException e){
 					System.out.println("Proc file format issue");

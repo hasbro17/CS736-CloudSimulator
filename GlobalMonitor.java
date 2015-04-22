@@ -115,6 +115,21 @@ public class GlobalMonitor {
 		logger.info(this.toString());
 		return removed;
 	}
+	
+	//Add a new incoming process to a VM
+	public boolean addNewProc(Proc proc, int dstID){
+		VM dst=null;
+		for (VM local : localMonitors) {
+			if(local.getVMID()==dstID){
+				dst=local;
+				break;
+			}
+		}
+		if(dst==null)
+			return false;
+		dst.addProc(proc);
+		return true;
+	}
 
 	//Migrate process pid, return false if something wrong(non existent process or VM)
 	//Also associate migration delay/number of delays
