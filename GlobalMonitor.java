@@ -187,13 +187,13 @@ public class GlobalMonitor {
 
 	public String toString() {
 		String result = "";
-		result+="=================================================\n";
+		result+="\n=================================================\n";
 		result+="Global State at" + " time : " + this.time + " total cost : " + totalCost + " migrations : " + numMigrations + "\n";
 		for (VM vm:localMonitors) {
 			result+=vm.toString();
 			//result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";
 		}
-		result+="=================================================\n";
+		//result+="=================================================\n";
 		return result.toString();
 	}
 
