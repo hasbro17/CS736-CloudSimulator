@@ -22,7 +22,7 @@ public class PerProcessBestFitPolicy implements Policy {
 		this.global=global;
 	}
 
-	//Policy to allocate new set of procs to availaible VMs
+	//Policy to allocate new set of procs to available VMs
 	//Allocate to smallest of VMtypes initially
 	public void allocateProcs(ArrayList<Proc> newProcs) {
 		VMTypes type = memOrderedTypes.get(0);
@@ -33,9 +33,7 @@ public class PerProcessBestFitPolicy implements Policy {
 	}
 
 	//Check and adjust the global state
-	//Check VMs over 75% and pick applications with usage>75%
 	public void adjust() {
-
 
 		//Scale UP
 		//Get all VM's above thresholds
@@ -48,22 +46,24 @@ public class PerProcessBestFitPolicy implements Policy {
 
 	}
 
-	
-	public void bestFit(ArrayList<VM> aboveMax){
-		for (VM src : aboveMax) {
+	//Tries to find best fit new VMs for procs 
+	public void bestFit(ArrayList<VM> outsideBounds){
+		for (VM src : outsideBounds) {
 			//Choose process from this VM, in this case only one
 			Proc toMigrate=src.getMemOrderedProcs().get(0);
 
 			//Find dst VM for this process
-			//In this case, create new one from types
-			VM dst=getTargetVM(toMigrate);
+			//In this case, get the type of the new VM
+			VMTypes dstType=getTargetVM(toMigrate,src);
 
 			//If dst found then migrate proc to new VM and close down old one
-			if(dst!=null)
+			if(dstType!=null)
 			{
-				//migrate
-				global.migrateProc(toMigrate.getPID(), src.getVMID(), dst.getVMID());
-				//close down old
+				//Create new VM in global
+				VM dstVM=global.createVM(dstType);
+				//migrate to new VM
+				global.migrateProc(toMigrate.getPID(), src.getVMID(), dstVM.getVMID());
+				//close down old VM(now empty)
 				global.removeVM(src.getVMID());
 			}
 
@@ -72,15 +72,26 @@ public class PerProcessBestFitPolicy implements Policy {
 
 
 	//Returns a best fit targetVM for the process for which memUtil is under max(80%)
-	//Returns null when no VM found big enough
-	private VM getTargetVM(Proc toMigrate){
-		VM newVM=null;
+	//Returns null when no VM found big enough or if dst is same type as src
+	private VMTypes getTargetVM(Proc toMigrate, VM src){
+		//VM newVM=null;
 		//From smallest to largest check the best fitting VM that stays under 80% with this proc
 		for (VMTypes type : memOrderedTypes) {
+			
 			//Can directly check from type without creating a new VM
+			if(type.isBelowMax(toMigrate.getMemUsage(), max))
+			{
+				//If best fit is the same as src then no need for new dst
+				if(type.getType().equals(src.getInstanceName()))
+					return null;
+				else
+					return type;
+			}
+			/*
 			newVM=new VM(type.getVCPU(), type.getMemory(), type.getHourlyRate(), type.getType());
 			if(newVM.isBelowMax(toMigrate.getMemUsage(), max))
-				return newVM;
+				return type;
+			*/
 		}
 		//No VM found big enough for this proc's usage
 		return null;

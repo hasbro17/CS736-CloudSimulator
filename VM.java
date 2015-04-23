@@ -13,7 +13,7 @@ public class VM {
 	private ArrayList<Proc> procs;
 	//Instance specs
 	private int vCPU;
-	private int RAM;//units: GBs
+	private double RAM;//units: GBs
 	//Time steps in minutes since VM running
 	private int time;
 	//Per hour cost
@@ -22,7 +22,7 @@ public class VM {
 	private String instanceName;
 
 	//constructor
-	public VM(int vCPU, int RAM, double hourlyRate, String instanceName){
+	public VM(int vCPU, double RAM, double hourlyRate, String instanceName){
 		this.vCPU=vCPU;
 		this.RAM=RAM;
 		this.hourlyRate=hourlyRate;
@@ -47,7 +47,7 @@ public class VM {
 	//Check if VM can stay below (mem)threshold by addition of new proc
 	//demand:demand of proc, upLimit: upper bound fraction of total
 	public boolean isBelowMax(double demand, double upBound){
-		return (getRawMemUtil()+demand)/(RAM*1024) > upBound;
+		return (getRawMemUtil()+demand)/(RAM*1024) < upBound;
 	}
 	
 	

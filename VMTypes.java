@@ -5,31 +5,37 @@ import java.util.ArrayList;
 public class VMTypes {
 	private String type;
 	private int vcpu;
-	private int memory;
+	private double RAM;
 	private double hourlyRate;
 
 	//constructor
-	public VMTypes(String type, String vcpu, String memory, String hourlyRate) {
+	public VMTypes(String type, String vcpu, String RAM, String hourlyRate) {
 		this.type = type;
 		this.vcpu = Integer.parseInt(vcpu);
-		this.memory = Integer.parseInt(memory);
+		this.RAM = Double.parseDouble(RAM);
 		this.hourlyRate = Double.parseDouble(hourlyRate);
 	}
-	
+
 	public String getType(){
 		return type;
 	}
-	
+
 	public int getVCPU(){
 		return vcpu;
 	}
-	
-	public int getMemory(){
-		return memory;
+
+	public double getMemory(){
+		return RAM;
 	}
-	
+
 	public double getHourlyRate(){
 		return hourlyRate;
+	}
+
+	//Check if VM can stay below (mem)threshold by addition of new proc
+	//demand:demand of proc, upLimit: upper bound fraction of total
+	public boolean isBelowMax(double demand, double upBound){
+		return (demand)/(RAM*1024) < upBound;
 	}
 
 	//Static members
@@ -37,19 +43,19 @@ public class VMTypes {
 	private static ArrayList<VMTypes> cpu = new ArrayList<VMTypes>();
 	private static ArrayList<VMTypes> mem = new ArrayList<VMTypes>();
 	private static ArrayList<VMTypes> rate = new ArrayList<VMTypes>();
-	
+
 	public static ArrayList<VMTypes> getMemOrdered(){
 		return mem;
 	}
-	
+
 	public static ArrayList<VMTypes> getCPUOrdered(){
 		return cpu;
 	}
-	
+
 	public static ArrayList<VMTypes> getCostOrdered(){
 		return rate;
 	}
-	
+
 	//Initialize VM instance types
 	public static void initVMTypes(String filename){
 		//init dictionary
@@ -71,7 +77,7 @@ public class VMTypes {
 		catch ( Exception e) {
 			System.out.println(e.getMessage());
 		}
-		
+
 		//init sorted lists via insertion sort
 		for (VMTypes vmType : VMDictionary) {
 			int i=0;
@@ -89,7 +95,7 @@ public class VMTypes {
 		}
 
 	}
-	
 
-	
+
+
 }

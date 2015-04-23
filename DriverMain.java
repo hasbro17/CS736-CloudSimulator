@@ -1,8 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -54,7 +51,7 @@ public class DriverMain {
 		{
 			//Decrement and check next arrival time
 			//Get new processes if available
-			if(procSpawn.checkNextArrivalTime()==0){
+			if(!procSpawn.isEmpty() && procSpawn.checkNextArrivalTime()==0){
 				//Get new procs
 				ArrayList<Proc> newProcs = procSpawn.spawnNextSet();
 				//policy allocates newProcs to VMs
