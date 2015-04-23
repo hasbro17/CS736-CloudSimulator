@@ -11,7 +11,7 @@ public class GlobalMonitor {
 	//VM's or local monitor instances
 	private ArrayList<VM> localMonitors;
 	//Total cost accumulated from running VM's since beginning
-	private int totalCost;
+	private double totalCost;
 	private int numMigrations;
 	//Time steps in minutes since VM running
 	private int time;
@@ -19,7 +19,7 @@ public class GlobalMonitor {
 	private Logger logger = Logger.getLogger("GlobalMonitorLog");
 	FileHandler fh;
 	SimpleFormatter formatter = new SimpleFormatter();
-	
+
 	private void initLogger() {
 		try {
 			fh  = new FileHandler("./GlobalMonitorLog.log");
@@ -52,15 +52,40 @@ public class GlobalMonitor {
 
 	/////Methods to observe Global State/////
 
+	//Return VMs above upperBound utilization(ascending)
+	//upperBound: threshold on max util
+	public ArrayList<VM> getAboveMax(double upperBound){
+		ArrayList<VM> aboveMax = new ArrayList<VM>();
+		for (VM vm : localMonitors) {
+			if(vm.getMemUtil()>upperBound)
+				aboveMax.add(vm);
+		}
+		Collections.sort(aboveMax, VM.memCompare);
+		return aboveMax;
+	}
+	
+	//Return VMs below lowerBound utilization(ascending)
+	//lowerBound: threshold on min util
+	public ArrayList<VM> getBelowMin(double lowerBound){
+		ArrayList<VM> belowMin = new ArrayList<VM>();
+		for (VM vm : localMonitors) {
+			if(vm.getMemUtil()<lowerBound)
+				belowMin.add(vm);
+		}
+		Collections.sort(belowMin, VM.memCompare);
+		return belowMin;
+	}
+	
 	//Return cumulative cost
-	public int getTotalCost() {
+	public double getTotalCost() {
 		return totalCost;
 	}	
-	
+
 	//Get number of migrations
 	public int getNumMigrations(){
 		return numMigrations;
 	}
+	
 
 	//VMs ordered by rawCPUUsage
 	public ArrayList<VM> getRawCPUOrder(){
@@ -91,16 +116,17 @@ public class GlobalMonitor {
 	}
 
 
-	//////Methods to change Global State/////
+	//////////////Methods to change Global State/////////////
 
 	//Create new VM instance
-	public void createVM(VMTypes vmType){
+	public VM createVM(VMTypes vmType){
 		logger.info("Adding VM => new state -");
 		VM vm = new VM(vmType.getVCPU(), vmType.getMemory(), vmType.getHourlyRate(), vmType.getType());
 		localMonitors.add(vm);
 		logger.info(this.toString());
+		return vm;
 	}
-	
+
 	//remove VM, return false if not found. 
 	public boolean removeVM(int vmID){
 		logger.info("Removing VM => new state -");
@@ -115,7 +141,7 @@ public class GlobalMonitor {
 		logger.info(this.toString());
 		return removed;
 	}
-	
+
 	//Add a new incoming process to a VM
 	public boolean addNewProc(Proc proc, int dstID){
 		VM dst=null;
@@ -152,19 +178,20 @@ public class GlobalMonitor {
 		if(toMigrate==null)
 			return false;
 		dst.addProc(toMigrate);
-		
+
 		//Increment migrations counter
 		numMigrations++;
 		logger.info(this.toString());
 		return true;
 	}
-	
+
 	public String toString() {
 		String result = "";
 		result+="=================================================\n";
 		result+="Global State at" + " time : " + this.time + " total cost : " + totalCost + " migrations : " + numMigrations + "\n";
 		for (VM vm:localMonitors) {
-			result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";
+			result+=vm.toString();
+			//result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";
 		}
 		result+="=================================================\n";
 		return result.toString();

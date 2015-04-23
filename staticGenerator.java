@@ -38,13 +38,14 @@ public class staticGenerator {
 	private static final double deltaFraction = 0.01;
 	private static final double initdeltaFraction = 0.1; 
 	private static final int distanceMultiplier = 500;  
-	/*
+	
 	public static void main(String[] args) throws IOException{
-			File fout = new File("out_static.txt");
+			double mean=400;
+			File fout = new File("trace-static-m"+mean+".txt");
 			FileOutputStream fos = new FileOutputStream(fout);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 			double demand;
-			staticGenerator gen1 = new staticGenerator(400);
+			staticGenerator gen1 = new staticGenerator(mean);
 //			System.out.println("Initial Demand: " + gen1.currentDemand);
 		for(int i=0; i < 120; i++) {
 			demand = gen1.generator();
@@ -56,6 +57,6 @@ public class staticGenerator {
 		}
 		bw.close();
 	}
-	*/
+	
 
 }
