@@ -65,13 +65,14 @@ public class lowVariability {
 	private static final int distanceMultiplier = 800;
 	private static final int counterInit = 40;  
 	private static final int meanBound = 30; // all means will be within 40% of original mean  
-	/*
+	
 	public static void main(String[] args) throws IOException {
-			File fout = new File("out_low.txt");
+			double mean = 800;
+			File fout = new File("trace-slow-m"+mean+".txt");
 			FileOutputStream fos = new FileOutputStream(fout);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 			double demand;
-			double mean = 400;
+			
 			lowVariability gen1 = new lowVariability(mean);
 //			System.out.println("Initial Demand: " + gen1.currentDemand);
 		for(int i=0; i < 120; i++) {
@@ -84,6 +85,6 @@ public class lowVariability {
 		}
 		bw.close();
 	}
-	*/
+	
 
 }

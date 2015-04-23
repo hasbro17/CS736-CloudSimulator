@@ -43,6 +43,14 @@ public class VM {
 		time++;
 		return hourlyRate/(60*1.0);
 	}
+	
+	//Check if VM can stay below (mem)threshold by addition of new proc
+	//demand:demand of proc, upLimit: upper bound fraction of total
+	public boolean isBelowMax(double demand, double upBound){
+		return (getRawMemUtil()+demand)/(RAM*1024) > upBound;
+	}
+	
+	
 
 	//Get instance name
 	public String getInstanceName(){
@@ -79,12 +87,13 @@ public class VM {
 	}
 
 	//Get Cost of VM since creation
-	double getTotalCost(){
+	public double getTotalCost(){
 		return hourlyRate*(time*1.0/60);
 	}
+	
 
 	//Raw memory usage of all processes in VM
-	double getRawMemUtil(){
+	public double getRawMemUtil(){
 		double totalProcUsage=0;
 		for (Proc proc : procs) {
 			totalProcUsage+=proc.getMemUsage();
@@ -107,7 +116,7 @@ public class VM {
 	}
 
 	//Fractional CpuUsage of all cores in VM
-	double getCPUUtil(){
+	public double getCPUUtil(){
 
 		return (getRawCPUUtil())/(vCPU*1.0);
 	}
@@ -116,14 +125,14 @@ public class VM {
 	//Can change to getMax and getMin methods if thats all thats needed later
 
 	//Get an array list of procs sorted(ascending) by their fractional cpu usage
-	ArrayList<Proc> getCPUOrderedProcs(){
+	public ArrayList<Proc> getCPUOrderedProcs(){
 		ArrayList<Proc> cpuOrdered = new ArrayList<Proc>(procs);
 		Collections.sort(cpuOrdered, Proc.cpuCompare);
 		return cpuOrdered;
 	}
 	
 	//Get an array list of procs sorted(ascending) by their memory usage
-	ArrayList<Proc> getMemOrderedProcs(){
+	public ArrayList<Proc> getMemOrderedProcs(){
 		ArrayList<Proc> memOrdered = new ArrayList<Proc>(procs);
 		Collections.sort(memOrdered, Proc.memCompare);
 		return memOrdered;
@@ -173,13 +182,13 @@ public class VM {
 	
 	public String toString() {
 		String result = "";
-		result+="=================================================\n";
-		result+="VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n";
+		result+="\t========================================\n";
+		result+="\tVMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + " MemUtil : "+this.getMemUtil() + "\n";
 		//result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
 		for (Proc proc:procs) {
-			result+="\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
+			result+="\t\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
 		}
-		result+="=================================================\n";
+		result+="\t=========================================\n";
 		return result.toString();
 	}
 
