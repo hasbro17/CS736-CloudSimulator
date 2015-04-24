@@ -2,14 +2,20 @@
  * 
  * Memory best fit policy when a VM can run more than one processes
  * 
- * 1. 
+ * Fixed cap on number of migrations per process per day and total cost per day
+ * Each VM can have more than one processes. 
+ * Policy has two parameters - max and min memory thresholds for VMs
  * 
- */
-
-
-
-
-
+ * 1. Find a VM whose mem utilization goes above max threshold.
+ * 2. Pick the processes from this VM until memory utilization comes below max threshold. Only pick the processes that do not violate number of migrations constraint.
+ * 3. Start from largest process and try to best fit it into existing VMs.
+ * 4. If processes are leftover, decide the best combination of new VMs to be spawned to minimize cost. Consider the total cost per day here.
+ * 5. Now best fit the processes into new VMs.
+ * 
+ * SideNote:
+ * Cost/day restricts the number of VMs allowed. As number of VMs allowed decreases memory pressure increases. This can be shown as performance degradation (related to swaps, pgflts)
+ * 
+ ************************************************************/
 
 import java.util.ArrayList;
 public class MultiProcessMemoryBestFitPolicy implements Policy {
@@ -20,7 +26,7 @@ private GlobalMonitor global;
 	private ArrayList<VMTypes> memOrderedTypes;
 
 	//Set max and min thresholds(fraction) of best fit
-	public PerProcessBestFitPolicy(double max, double min) {
+	public MultiProcessMemoryBestFitPolicy(double max, double min) {
 		this.max=max;
 		this.min=min;
 		//Set memory sorted list of VM types available
