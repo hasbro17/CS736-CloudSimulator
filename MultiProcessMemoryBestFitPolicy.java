@@ -61,16 +61,22 @@ private GlobalMonitor global;
 		//Scale UP
 		//Get all VM's above thresholds
 		ArrayList<VM> aboveMax = global.getAboveMax(max);
-		bestFit(aboveMax);
+		ArrayList<Proc> leftoverProcs = bestFit(aboveMax);
+		if (leftoverProcs != null) {
+			// TODO: Call method to create new VMs and assign procs to them
+		}
 		
+	
+		//TODO Verify scale down
 		//Scale Down
 		ArrayList<VM> belowMin = global.getBelowMin(min);
 		bestFit(belowMin);
 
 	}
 
-	//Tries to find best fit new VMs for procs 
-	public void bestFit(ArrayList<VM> outsideBounds){
+	//Tries to find best fit VMs for procs 
+	public ArrayList<Proc> bestFit(ArrayList<VM> outsideBounds){
+		ArrayList<Proc> leftoverProcs = new ArrayList<Proc>();
 		for (VM src : outsideBounds) {
 			//Choose process from this VM, in this case only one
 			Proc toMigrate=src.getMemOrderedProcs().get(0);
@@ -79,20 +85,10 @@ private GlobalMonitor global;
 			VM dstVM=getExistingTargetVM(toMigrate,src);
 			
 			if (dstVM == null) {
-				//In this case, get the type of the new VM
-				VMTypes dstType=getTargetVM(toMigrate,src);
-				//If dst found then migrate proc to new VM and close down old one
-				if(dstType!=null)
-				{
-					//Create new VM in global
-					VM newdstVM=global.createVM(dstType);
-					//migrate to new VM
-					global.migrateProc(toMigrate.getPID(), src.getVMID(), newdstVM.getVMID());
-					//close down old VM(now empty)
-					global.removeVM(src.getVMID());
-				}
+				leftoverProcs.add(toMigrate);
 			}
 		}
+		return leftoverProcs;
 	}
 
 
@@ -110,32 +106,6 @@ private GlobalMonitor global;
 		return null;
 	}
 
-	//Returns a best fit targetVM for the process for which memUtil is under max(80%)
-	//Returns null when no VM found big enough or if dst is same type as src
-	private VMTypes getTargetVM(Proc toMigrate, VM src){
-		//VM newVM=null;
-		//From smallest to largest check the best fitting VM that stays under 80% with this proc
-		for (VMTypes type : memOrderedTypes) {
-			
-			//Can directly check from type without creating a new VM
-			if(type.isBelowMax(toMigrate.getMemUsage(), max))
-			{
-				//If best fit is the same as src then no need for new dst
-				if(type.getType().equals(src.getInstanceName()))
-					return null;
-				else
-					return type;
-			}
-			/*
-			newVM=new VM(type.getVCPU(), type.getMemory(), type.getHourlyRate(), type.getType());
-			if(newVM.isBelowMax(toMigrate.getMemUsage(), max))
-				return type;
-			*/
-		}
-		//No VM found big enough for this proc's usage
-		return null;
-	}
-	
 	
 	// Find the first VM in the list that has some capacity.
 	// Used to allocate new incoming processes
