@@ -43,8 +43,15 @@ private GlobalMonitor global;
 	public void allocateProcs(ArrayList<Proc> newProcs) {
 		VMTypes type = memOrderedTypes.get(0);
 		for (Proc proc : newProcs) {
-			VM newVM = global.createVM(type);
-			global.addNewProc(proc, newVM.getVMID());
+			// Find a VM from existing to allocate a new process
+			VM vm = getFirstUnderutilizedExistingVM(proc);
+			if (vm == null) {
+				// Didn't find any existing VM so create new
+				VM newVM = global.createVM(type);
+				global.addNewProc(proc, newVM.getVMID());
+			}
+			else
+				global.addNewProc(proc, vm.getVMID());
 		}
 	}
 
@@ -68,24 +75,40 @@ private GlobalMonitor global;
 			//Choose process from this VM, in this case only one
 			Proc toMigrate=src.getMemOrderedProcs().get(0);
 
-			//Find dst VM for this process
-			//In this case, get the type of the new VM
-			VMTypes dstType=getTargetVM(toMigrate,src);
-
-			//If dst found then migrate proc to new VM and close down old one
-			if(dstType!=null)
-			{
-				//Create new VM in global
-				VM dstVM=global.createVM(dstType);
-				//migrate to new VM
-				global.migrateProc(toMigrate.getPID(), src.getVMID(), dstVM.getVMID());
-				//close down old VM(now empty)
-				global.removeVM(src.getVMID());
+			//Find dst VM from existing VMs for this process
+			VM dstVM=getExistingTargetVM(toMigrate,src);
+			
+			if (dstVM == null) {
+				//In this case, get the type of the new VM
+				VMTypes dstType=getTargetVM(toMigrate,src);
+				//If dst found then migrate proc to new VM and close down old one
+				if(dstType!=null)
+				{
+					//Create new VM in global
+					VM newdstVM=global.createVM(dstType);
+					//migrate to new VM
+					global.migrateProc(toMigrate.getPID(), src.getVMID(), newdstVM.getVMID());
+					//close down old VM(now empty)
+					global.removeVM(src.getVMID());
+				}
 			}
-
 		}
 	}
 
+
+	private VM getExistingTargetVM(Proc toMigrate, VM src) {
+		double newMemUsage = 0;
+		double memLeft = Double.MAX_VALUE;
+		VM targetVM = null;
+		for (VM vm : global.getLocalMonitors()) {
+			newMemUsage = vm.getMemUtil() + toMigrate.getMemUsage();
+			if (newMemUsage < max && memLeft < vm.getRAM() - newMemUsage) {
+				targetVM = vm;
+				memLeft = vm.getRAM() - newMemUsage;
+			}
+		}
+		return null;
+	}
 
 	//Returns a best fit targetVM for the process for which memUtil is under max(80%)
 	//Returns null when no VM found big enough or if dst is same type as src
@@ -110,6 +133,19 @@ private GlobalMonitor global;
 			*/
 		}
 		//No VM found big enough for this proc's usage
+		return null;
+	}
+	
+	
+	// Find the first VM in the list that has some capacity.
+	// Used to allocate new incoming processes
+	private VM getFirstUnderutilizedExistingVM(Proc p) {
+		ArrayList<VM> vms = global.getLocalMonitors();
+		for (VM vm : vms) {
+			if (vm.getMemUtil() < max)
+				return vm;
+		}
+		// no VM exists with less than max utilization
 		return null;
 	}
 }

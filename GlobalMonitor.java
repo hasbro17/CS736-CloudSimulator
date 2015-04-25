@@ -10,6 +10,10 @@ public class GlobalMonitor {
 
 	//VM's or local monitor instances
 	private ArrayList<VM> localMonitors;
+	public ArrayList<VM> getLocalMonitors() {
+		return localMonitors;
+	}
+
 	//Total cost accumulated from running VM's since beginning
 	private double totalCost;
 	private int numMigrations;

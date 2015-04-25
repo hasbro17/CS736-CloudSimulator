@@ -14,6 +14,14 @@ public class VM {
 	//Instance specs
 	private int vCPU;
 	private double RAM;//units: GBs
+	public int getvCPU() {
+		return vCPU;
+	}
+
+	public double getRAM() {
+		return RAM;
+	}
+
 	//Time steps in minutes since VM running
 	private int time;
 	//Per hour cost
