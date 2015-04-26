@@ -9,7 +9,7 @@
  * 1. Find a VM whose mem utilization goes above max threshold.
  * 2. Pick the processes from this VM until memory utilization comes below max threshold. Only pick the processes that do not violate number of migrations constraint.
  * 3. Start from largest process and try to best fit it into existing VMs.
- * 4. If processes are leftover, decide the best combination of new VMs to be spawned to minimize cost. Consider the total cost per day here.
+ * 4. (Knapsack problem with duplicates allowed)If processes are leftover, decide the best combination of new VMs to be spawned to minimize cost. Consider the total cost per day here.
  * 5. Now best fit the processes into new VMs.
  * 
  * SideNote:
@@ -103,7 +103,7 @@ private GlobalMonitor global;
 				memLeft = vm.getRAM() - newMemUsage;
 			}
 		}
-		return null;
+		return targetVM;
 	}
 
 	
