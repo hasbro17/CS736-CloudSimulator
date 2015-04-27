@@ -6,8 +6,10 @@ import java.util.logging.SimpleFormatter;
 
 //Tester class for cloud simulation
 public class DriverMain {
-
 	
+	//To be changed by policies
+	//Set Median Window size, can be changed at any given point to get fast or slow moving median
+	public static int MEDIANWINDOW=1;
 
 	public static void main(String[] args) {
 		

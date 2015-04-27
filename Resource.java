@@ -1,17 +1,36 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 //Generic Resource Class capable of 3 types of usage patterns
 //Now a glorified file reader :/
 public class Resource {
 
+	//Resource types
+	public static final String STATIC="static";
+	public static final String FAST="fast";
+	public static final String SLOW="slow";
+
 	//Current usage
 	private double currentUsage;
-	private Scanner scnr;
+
 	//true when process trace finishes from file, signal for VM to remove it
 	private boolean finished;
 
+	//Scanner to read usage from file
+	private Scanner scnr;
+
+	//Resource type
+	private String type;
+
+	//History of usage
+	ArrayList<Double> history = null;
+	//Window size
+	int maxWindowSize;
+
+	//Constructor prepares scanner and reads fileName to tag resource type(static,slow,fast)
 	public Resource(String fileName){
 		File file = new File(fileName);
 		try {
@@ -21,6 +40,20 @@ public class Resource {
 			System.out.println("Could not find resource file: "+fileName);
 			e.printStackTrace();
 		}
+		//Filename must be of format: "trace-<type>-mNNN.txt"
+		String tokens[] = fileName.split("-");
+		//Static by default
+		type=STATIC;
+		if(tokens.length>2)
+		{
+			if(tokens[1].equals(FAST))
+				type=FAST;
+			else if(tokens[1].equals(SLOW))
+				type=SLOW;
+		}
+
+		history=new ArrayList<Double>();
+		maxWindowSize=1000;
 	}
 
 	//Update usage by reading in next usage from file
@@ -34,14 +67,46 @@ public class Resource {
 			finished=true;
 			currentUsage=0;//process usage finishes, no load
 		}
+
+		//Build up history of window size for running median
+		if(history.size()<maxWindowSize)
+		{
+			history.add(0,currentUsage);
+		}
+		else
+		{
+			history.remove(maxWindowSize-1);
+			history.add(0, currentUsage);
+		}
+
+
 		return currentUsage;
 	}
-	
+
+
+	//Get running median of mem utilization for a window size of k
+	//Return fractional mem utilization from 
+	public double getMedianUsage(){
+		//Get window of history
+		ArrayList<Double> window = new ArrayList<Double>();
+		int i=0;
+		int size=Math.min(history.size(),DriverMain.MEDIANWINDOW);
+		while(i<size){
+			window.add(history.get(i));
+			i++;
+		}
+		Collections.sort(window);
+		double medianUsage=0;
+		if(window.size()>0)
+			medianUsage=(window.get((size-1)/2)); 
+		return medianUsage;
+	}
+
 	//Returns raw usage number of resource
 	public double getUsage(){
 		return currentUsage;
 	}
-	
+
 	//To check if process finished
 	public boolean isFinished(){
 		return finished;

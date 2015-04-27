@@ -13,6 +13,8 @@ public class PerProcessBestFitPolicy implements Policy {
 	public PerProcessBestFitPolicy(double max, double min) {
 		this.max=max;
 		this.min=min;
+		DriverMain.MEDIANWINDOW=1;
+		
 		//Set memory sorted list of VM types available
 		memOrderedTypes=VMTypes.getMemOrdered();
 	}
@@ -36,11 +38,11 @@ public class PerProcessBestFitPolicy implements Policy {
 	public void adjust() {
 
 		//Scale UP
-		//Get all VM's above thresholds
+		//Get all VM's above thresholds, median window 1
 		ArrayList<VM> aboveMax = global.getAboveMax(max);
 		bestFit(aboveMax);
 		
-		//Scale Down
+		//Scale Down, median window 1
 		ArrayList<VM> belowMin = global.getBelowMin(min);
 		bestFit(belowMin);
 

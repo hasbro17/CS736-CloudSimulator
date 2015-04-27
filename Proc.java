@@ -40,16 +40,16 @@ public class Proc {
 		return pid;
 	}
 
-	//get CPU usage for proc
+	//get CPU usage for proc MEDIAN
 	//Units:Normalized to number of vcpus
 	public double getCPUUsage(){
-		return cpu.getUsage()/(1000*1.0);
+		return cpu.getMedianUsage()/(1000*1.0);
 	}
 
-	//get Mem usage for proc
+	//get Mem usage for proc MEDIAN
 	//Units: MBs for now
 	public double getMemUsage(){
-		return mem.getUsage();
+		return mem.getMedianUsage();
 	}
 
 	//Comparators used for sorting proc lists

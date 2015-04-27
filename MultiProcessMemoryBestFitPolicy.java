@@ -29,6 +29,7 @@ private GlobalMonitor global;
 	public MultiProcessMemoryBestFitPolicy(double max, double min) {
 		this.max=max;
 		this.min=min;
+		//DriverMain.MEDIANWINDOW=?
 		//Set memory sorted list of VM types available
 		memOrderedTypes=VMTypes.getMemOrdered();
 	}
@@ -59,7 +60,7 @@ private GlobalMonitor global;
 	public void adjust() {
 
 		//Scale UP
-		//Get all VM's above thresholds
+		//Get all VM's above thresholds, median window 1
 		ArrayList<VM> aboveMax = global.getAboveMax(max);
 		ArrayList<Proc> leftoverProcs = bestFit(aboveMax);
 		if (leftoverProcs != null) {
@@ -68,7 +69,7 @@ private GlobalMonitor global;
 		
 	
 		//TODO Verify scale down
-		//Scale Down
+		//Scale Down, median window,1
 		ArrayList<VM> belowMin = global.getBelowMin(min);
 		bestFit(belowMin);
 

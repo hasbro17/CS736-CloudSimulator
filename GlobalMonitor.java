@@ -55,9 +55,10 @@ public class GlobalMonitor {
 	}
 
 	/////Methods to observe Global State/////
-
+	
+	
 	//Return VMs above upperBound utilization(ascending)
-	//upperBound: threshold on max util
+	//upperBound: threshold on max util, k window size for running median
 	public ArrayList<VM> getAboveMax(double upperBound){
 		ArrayList<VM> aboveMax = new ArrayList<VM>();
 		for (VM vm : localMonitors) {
@@ -69,7 +70,7 @@ public class GlobalMonitor {
 	}
 	
 	//Return VMs below lowerBound utilization(ascending)
-	//lowerBound: threshold on min util
+	//lowerBound: threshold on min util, k window size for running median
 	public ArrayList<VM> getBelowMin(double lowerBound){
 		ArrayList<VM> belowMin = new ArrayList<VM>();
 		for (VM vm : localMonitors) {

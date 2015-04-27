@@ -1,9 +1,12 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 //VM Class responsible for running a set of processes and reporting usage statistics
 public class VM {
+
+
 
 	//Static VMID
 	private static int VMID=1;
@@ -14,13 +17,6 @@ public class VM {
 	//Instance specs
 	private int vCPU;
 	private double RAM;//units: GBs
-	public int getvCPU() {
-		return vCPU;
-	}
-
-	public double getRAM() {
-		return RAM;
-	}
 
 	//Time steps in minutes since VM running
 	private int time;
@@ -38,8 +34,9 @@ public class VM {
 		procs=new ArrayList<Proc>();
 		vmID=VMID;
 		VMID++;
+
 	}
-	
+
 	//To mark simulation end, all procs finished
 
 	//Compute one time step for all procs
@@ -49,16 +46,24 @@ public class VM {
 			proc.computeNextStep();
 		}
 		time++;
+
 		return hourlyRate/(60*1.0);
 	}
-	
+
 	//Check if VM can stay below (mem)threshold by addition of new proc
 	//demand:demand of proc, upLimit: upper bound fraction of total
 	public boolean isBelowMax(double demand, double upBound){
 		return (getRawMemUtil()+demand)/(RAM*1024) < upBound;
 	}
-	
-	
+
+
+	public int getvCPU() {
+		return vCPU;
+	}
+
+	public double getRAM() {
+		return RAM;
+	}
 
 	//Get instance name
 	public String getInstanceName(){
@@ -99,7 +104,6 @@ public class VM {
 		return hourlyRate*(time*1.0/60);
 	}
 	
-
 	//Raw memory usage of all processes in VM
 	public double getRawMemUtil(){
 		double totalProcUsage=0;
@@ -138,7 +142,7 @@ public class VM {
 		Collections.sort(cpuOrdered, Proc.cpuCompare);
 		return cpuOrdered;
 	}
-	
+
 	//Get an array list of procs sorted(ascending) by their memory usage
 	public ArrayList<Proc> getMemOrderedProcs(){
 		ArrayList<Proc> memOrdered = new ArrayList<Proc>(procs);
@@ -187,7 +191,7 @@ public class VM {
 				return v1.getMemUtil()>v2.getMemUtil() ? 1:-1;
 		}
 	};
-	
+
 	public String toString() {
 		String result = "";
 		result+="\t========================================\n";
