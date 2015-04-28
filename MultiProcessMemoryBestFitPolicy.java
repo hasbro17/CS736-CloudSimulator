@@ -65,6 +65,7 @@ private GlobalMonitor global;
 		ArrayList<Proc> leftoverProcs = bestFit(aboveMax);
 		if (leftoverProcs != null) {
 			// TODO: Call method to create new VMs and assign procs to them
+			handleLeftoverProcesses(leftoverProcs);
 		}
 		
 	
@@ -74,16 +75,69 @@ private GlobalMonitor global;
 		bestFit(belowMin);
 
 	}
+	
+	// Wrapper around solveKnapsack. Calls solveKnapsack and the best fits processes into the returned set
+	private void handleLeftoverProcesses(ArrayList<Proc> leftovers) {
+		ArrayList<VMTypes> targetTypes = solveKnapsack(leftovers);
+		
+		// now best fit the leftovers in these
+		for (VMTypes vmTypes : targetTypes) {
+			global.createVM(vmTypes);
+		}
+		allocateProcs(leftovers);
+	}
+	
+	// Find the cheapest combination of new VMs (Knapsack problem)
+	// W = total mem requirement of all leftover processes
+	// wt[] = mem capacity of VM types
+	// val[] = cost of VM types
+	private ArrayList<VMTypes> solveKnapsack(ArrayList<Proc> leftovers) {
+		ArrayList<VMTypes> memOrdered = VMTypes.getMemOrdered();
+		ArrayList<Integer> wt = new ArrayList<Integer>();
+		ArrayList<Double> val = new ArrayList<Double>();
+		ArrayList<VMTypes> retVMTypes = new ArrayList<VMTypes>();
+		int W = 0;
+		for (VMTypes vmTypes : memOrdered) {
+			int a=(int)vmTypes.getMemory();
+			wt.add(a*1024);
+			val.add(vmTypes.getHourlyRate());
+		}
+		for (Proc proc : leftovers) {
+			W += proc.getMemUsage();
+		}
+		
+		int N = wt.size();
+		double[][] V = new double[N + 1][W + 1];
+		for (int col = 0; col <= W; col++) {
+			V[0][col] = 0;
+		}
+		for (int row = 0; row <= N; row++) {
+			V[row][0] = 0;
+		}
+		for (int item = 1; item <= N; item++) {
+			for (int weight = 1; weight <= W; weight++) {
+				if (wt.get(item - 1) <= weight) {
+					V[item][weight] = Math.max(val.get(item - 1)+ V[item - 1][weight - wt.get(item - 1)],V[item - 1][weight]);
+					if (val.get(item - 1)+ V[item - 1][weight - wt.get(item - 1)] >= V[item - 1][weight])
+						retVMTypes.add(memOrdered.get(item-1));
+				}
+				else {
+					V[item][weight] = V[item - 1][weight];
+				}
+			}
+		}
+		return retVMTypes;
+	}
 
 	//Tries to find best fit VMs for procs 
 	public ArrayList<Proc> bestFit(ArrayList<VM> outsideBounds){
 		ArrayList<Proc> leftoverProcs = new ArrayList<Proc>();
 		for (VM src : outsideBounds) {
-			//Choose process from this VM, in this case only one
+			// TODO Choose largest/smallest processes from VM until the threshold is satisfied based on a flag
 			Proc toMigrate=src.getMemOrderedProcs().get(0);
 
 			//Find dst VM from existing VMs for this process
-			VM dstVM=getExistingTargetVM(toMigrate,src);
+			VM dstVM=getExistingTargetVM(toMigrate);
 			
 			if (dstVM == null) {
 				leftoverProcs.add(toMigrate);
@@ -93,7 +147,7 @@ private GlobalMonitor global;
 	}
 
 
-	private VM getExistingTargetVM(Proc toMigrate, VM src) {
+	private VM getExistingTargetVM(Proc toMigrate) {
 		double newMemUsage = 0;
 		double memLeft = Double.MAX_VALUE;
 		VM targetVM = null;
