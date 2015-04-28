@@ -132,15 +132,22 @@ private GlobalMonitor global;
 	//Tries to find best fit VMs for procs 
 	public ArrayList<Proc> bestFit(ArrayList<VM> outsideBounds){
 		ArrayList<Proc> leftoverProcs = new ArrayList<Proc>();
+		//Proc previousProc = null;
+		int i=0;
 		for (VM src : outsideBounds) {
 			// TODO Choose largest/smallest processes from VM until the threshold is satisfied based on a flag
-			Proc toMigrate=src.getMemOrderedProcs().get(0);
-
-			//Find dst VM from existing VMs for this process
-			VM dstVM=getExistingTargetVM(toMigrate);
-			
-			if (dstVM == null) {
-				leftoverProcs.add(toMigrate);
+			//Proc toMigrate=src.getMemOrderedProcs().get(0);
+			while (src.getMemUtil() > max) {
+				Proc toMigrate=src.getMemOrderedProcs().get(i);
+	
+				//Find dst VM from existing VMs for this process
+				VM dstVM=getExistingTargetVM(toMigrate);
+				
+				if (dstVM == null) {
+					leftoverProcs.add(toMigrate);
+					//previousProc = toMigrate;
+				}
+				i++;
 			}
 		}
 		return leftoverProcs;
