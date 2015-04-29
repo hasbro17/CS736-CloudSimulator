@@ -12,6 +12,21 @@
  * 4. (Knapsack problem with duplicates allowed)If processes are leftover, decide the best combination of new VMs to be spawned to minimize cost. Consider the total cost per day here.
  * 5. Now best fit the processes into new VMs.
  * 
+ * FIXME:
+ * Scale up and scale down need different handling
+ * 1. Scale Down:
+ * 		//Scale down should have a different approach than best fitting
+		//procs into existing VMs.
+		//1. Mark all procs in the belowMin VMs (so we effectively consider the belowMin VMs as empty now)
+		//2. Try to pack these marked procs(largest/smallest first policy choice) into other VMs that were not underutilized.
+		//3. Left over procs that could not be fitted in the second step are now tried against the empty VMs.
+		//	 Pack them in the empty VMs.
+		//4.Close down any empty VMs after this.
+		 * 
+	2. Scale Up:
+		//In scale up while finding targetVM we should not consider all VMs as targets. Exclude the ones that
+		 * were overUtil. Currently considers all.
+ * 
  * SideNote:
  * Cost/day restricts the number of VMs allowed. As number of VMs allowed decreases memory pressure increases. This can be shown as performance degradation (related to swaps, pgflts)
  * 
@@ -68,7 +83,8 @@ private GlobalMonitor global;
 			handleLeftoverProcesses(leftoverProcs);
 		}
 		
-	
+
+
 		//TODO Verify scale down
 		//Scale Down, median window,1
 		ArrayList<VM> belowMin = global.getBelowMin(min);
