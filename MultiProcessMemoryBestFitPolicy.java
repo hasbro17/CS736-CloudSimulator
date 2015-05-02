@@ -30,6 +30,8 @@
  ************************************************************/
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 public class MultiProcessMemoryBestFitPolicy implements Policy {
 
 private GlobalMonitor global;
@@ -80,8 +82,6 @@ private GlobalMonitor global;
 			handleLeftoverProcesses(leftoverProcs);
 		}
 		
-
-
 		//TODO Different approach for scale down
 		//Scale Down, median window,1
 		ArrayList<VM> belowMin = global.getBelowMin(min);
@@ -91,7 +91,6 @@ private GlobalMonitor global;
 			handleLeftoverProcesses(leftoverProcs);
 		}
 		removeEmptyVMs();
-
 	}
 	
 	private void removeEmptyVMs() {
@@ -100,7 +99,6 @@ private GlobalMonitor global;
 				global.removeVM(vm.getVMID());
 			}
 		}
-		
 	}
 
 	private ArrayList<Proc> ScaleDown(ArrayList<VM> belowMin) {
@@ -176,6 +174,9 @@ private GlobalMonitor global;
 				}
 			}
 		}
+		Set<VMTypes> set = new HashSet<VMTypes>(retVMTypes);
+		retVMTypes.clear();
+		retVMTypes.addAll(set);
 		return retVMTypes;
 	}
 
@@ -187,7 +188,7 @@ private GlobalMonitor global;
 		for (VM src : outsideBounds) {
 			// TODO Choose largest/smallest processes from VM until the threshold is satisfied based on a flag
 			//Proc toMigrate=src.getMemOrderedProcs().get(0);
-			while (src.getMemUtil() > max) {
+			while (src.getMemUtil() > max && i < src.getMemOrderedProcs().size()) {
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 	
 				//Find dst VM from existing VMs for this process
@@ -199,6 +200,7 @@ private GlobalMonitor global;
 				}
 				i++;
 			}
+			i = 0;
 		}
 		return leftoverProcs;
 	}
