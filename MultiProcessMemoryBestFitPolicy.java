@@ -23,9 +23,6 @@
 		//	 Pack them in the empty VMs.
 		//4.Close down any empty VMs after this.
 		 * 
-	2. Scale Up:
-		//In scale up while finding targetVM we should not consider all VMs as targets. Exclude the ones that
-		 * were overUtil. Currently considers all.
  * 
  * SideNote:
  * Cost/day restricts the number of VMs allowed. As number of VMs allowed decreases memory pressure increases. This can be shown as performance degradation (related to swaps, pgflts)
@@ -78,20 +75,57 @@ private GlobalMonitor global;
 		//Get all VM's above thresholds, median window 1
 		ArrayList<VM> aboveMax = global.getAboveMax(max);
 		ArrayList<Proc> leftoverProcs = bestFit(aboveMax);
-		if (leftoverProcs != null) {
-			// TODO: Call method to create new VMs and assign procs to them
+		if (leftoverProcs.size() > 0) {
+			// Call method to create new VMs and assign procs to them
 			handleLeftoverProcesses(leftoverProcs);
 		}
 		
 
 
-		//TODO Verify scale down
+		//TODO Different approach for scale down
 		//Scale Down, median window,1
 		ArrayList<VM> belowMin = global.getBelowMin(min);
-		bestFit(belowMin);
+		leftoverProcs = ScaleDown(belowMin);
+		if (leftoverProcs.size() > 0) {
+			// TODO: Call method to handle leftovers
+			handleLeftoverProcesses(leftoverProcs);
+		}
+		removeEmptyVMs();
 
 	}
 	
+	private void removeEmptyVMs() {
+		for (VM vm : global.getLocalMonitors()) {
+			if (vm.getMemUtil() == 0) { // equal to zero
+				global.removeVM(vm.getVMID());
+			}
+		}
+		
+	}
+
+	private ArrayList<Proc> ScaleDown(ArrayList<VM> belowMin) {
+		ArrayList<Proc> leftoverProcs = new ArrayList<Proc>();
+		//Proc previousProc = null;
+		int i=0;
+		for (VM src : belowMin) {
+			// Choose all processes from VM until it is empty
+			while (src.getMemUtil() > 0) {
+				Proc toMigrate=src.getMemOrderedProcs().get(i);
+	
+				//Find dst VM from existing VMs for this process
+				VM dstVM=getExistingTargetVM(toMigrate,belowMin);
+				
+				if (dstVM == null) {
+					leftoverProcs.add(toMigrate);
+					//previousProc = toMigrate;
+				}
+				i++;
+			}
+		}
+		return leftoverProcs;
+		
+	}
+
 	// Wrapper around solveKnapsack. Calls solveKnapsack and the best fits processes into the returned set
 	private void handleLeftoverProcesses(ArrayList<Proc> leftovers) {
 		ArrayList<VMTypes> targetTypes = solveKnapsack(leftovers);
@@ -157,7 +191,7 @@ private GlobalMonitor global;
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 	
 				//Find dst VM from existing VMs for this process
-				VM dstVM=getExistingTargetVM(toMigrate);
+				VM dstVM=getExistingTargetVM(toMigrate,outsideBounds);
 				
 				if (dstVM == null) {
 					leftoverProcs.add(toMigrate);
@@ -170,11 +204,14 @@ private GlobalMonitor global;
 	}
 
 
-	private VM getExistingTargetVM(Proc toMigrate) {
+	private VM getExistingTargetVM(Proc toMigrate, ArrayList<VM>currentVMSet) {
 		double newMemUsage = 0;
 		double memLeft = Double.MAX_VALUE;
 		VM targetVM = null;
 		for (VM vm : global.getLocalMonitors()) {
+			// Skip over VMs that are above/below threshold
+			if (currentVMSet.contains(vm))
+				continue;
 			newMemUsage = vm.getMemUtil() + toMigrate.getMemUsage();
 			if (newMemUsage < max && memLeft < vm.getRAM() - newMemUsage) {
 				targetVM = vm;
@@ -196,6 +233,11 @@ private GlobalMonitor global;
 		// no VM exists with less than max utilization
 		return null;
 	}
+
+	// Main method for testing
+	/* public static void main(String[] args) {
+		
+	}*/
 }
 
 
