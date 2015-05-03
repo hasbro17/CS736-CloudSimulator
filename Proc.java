@@ -13,6 +13,15 @@ public class Proc {
 	//Resource objects for memory and cpu
 	private Resource cpu;
 	private Resource mem;
+	private int srcVMID;
+
+	public int getSrcVMID() {
+		return srcVMID;
+	}
+
+	public void setSrcVMID(int srcVMID) {
+		this.srcVMID = srcVMID;
+	}
 
 	//Constructor
 	public Proc(String cpuTypeFile, String memTypeFile){

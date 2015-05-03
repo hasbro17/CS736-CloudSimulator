@@ -30,6 +30,7 @@
  ************************************************************/
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -44,7 +45,7 @@ private GlobalMonitor global;
 	public MultiProcessMemoryBestFitPolicy(double max, double min) {
 		this.max=max;
 		this.min=min;
-		//DriverMain.MEDIANWINDOW=?
+		DriverMain.MEDIANWINDOW=1;
 		//Set memory sorted list of VM types available
 		memOrderedTypes=VMTypes.getMemOrdered();
 	}
@@ -133,15 +134,41 @@ private GlobalMonitor global;
 		
 	}
 
-	// Wrapper around solveKnapsack. Calls solveKnapsack and the best fits processes into the returned set
+	// Using first fit policy for leftovers
 	private void handleLeftoverProcesses(ArrayList<Proc> leftovers) {
-		ArrayList<VMTypes> targetTypes = solveKnapsack(leftovers);
+		Collections.sort(leftovers,Proc.memCompare);
+		Collections.reverse(leftovers);
+		
+		for (Proc proc : leftovers) {
+			VM dstVM=getExistingTargetVM(proc,new ArrayList<VM>());
+			if (dstVM == null) {
+				for (VMTypes type : memOrderedTypes) {
+					//Can directly check from type without creating a new VM
+					if(type.isBelowMax(proc.getMemUsage(), max)) {
+						dstVM = global.createVM(type);
+						global.migrateProc(proc.getPID(), proc.getSrcVMID(), dstVM.getVMID());
+						break;
+					}
+				}
+			}
+			else {
+				global.migrateProc(proc.getPID(), proc.getSrcVMID(), dstVM.getVMID());
+			}
+		}
+
+		
+		/*ArrayList<VMTypes> targetTypes = solveKnapsack(leftovers);
 		
 		// now best fit the leftovers in these
 		for (VMTypes vmTypes : targetTypes) {
 			global.createVM(vmTypes);
 		}
-		allocateProcs(leftovers);
+		// Cannot use allocate procs as it does not remove the process
+		// allocateProcs(leftovers);
+		for (Proc p : leftovers) {
+			VM dstVM=getExistingTargetVM(p,new ArrayList<VM>());
+			global.migrateProc(p.getPID(), p.getSrcVMID(), dstVM.getVMID());
+		}*/
 	}
 	
 	// Find the cheapest combination of new VMs (Knapsack problem)
@@ -192,12 +219,13 @@ private GlobalMonitor global;
 	//Tries to find best fit VMs for procs 
 	public ArrayList<Proc> bestFit(ArrayList<VM> outsideBounds){
 		ArrayList<Proc> leftoverProcs = new ArrayList<Proc>();
-		//Proc previousProc = null;
+		
 		int i=0;
 		for (VM src : outsideBounds) {
 			// TODO Choose largest/smallest processes from VM until the threshold is satisfied based on a flag
-			//Proc toMigrate=src.getMemOrderedProcs().get(0);
-			while (src.getMemUtil() > (max*src.getRAM()) && i < src.getMemOrderedProcs().size()) {
+			
+			while (src.getMemUtil() > max && i < src.getMemOrderedProcs().size()) {
+				
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 	
 				//Find dst VM from existing VMs for this process
@@ -205,7 +233,6 @@ private GlobalMonitor global;
 				
 				if (dstVM == null) {
 					leftoverProcs.add(toMigrate);
-					//previousProc = toMigrate;
 				}
 				else {
 					global.migrateProc(toMigrate.getPID(), src.getVMID(), dstVM.getVMID());
@@ -226,7 +253,7 @@ private GlobalMonitor global;
 			// Skip over VMs that are above/below threshold
 			if (currentVMSet.contains(vm))
 				continue;
-			newMemUsage = vm.getMemUtil() + toMigrate.getMemUsage();
+			newMemUsage = vm.getRawMemUtil() + toMigrate.getMemUsage();
 			if (newMemUsage < (max*vm.getRAM()) && memLeft > vm.getRAM() - newMemUsage) {
 				targetVM = vm;
 				memLeft = vm.getRAM() - newMemUsage;

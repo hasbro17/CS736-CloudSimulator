@@ -83,6 +83,7 @@ public class VM {
 	//Add process to VM, add to sorted lists as well
 	public void addProc(Proc proc){
 		procs.add(proc);
+		proc.setSrcVMID(this.vmID);
 	}
 
 	//Remove a processes from this vm
@@ -96,6 +97,7 @@ public class VM {
 				break;
 			}
 		}
+		toRemove.setSrcVMID(-1);
 		return toRemove;
 	}
 
