@@ -56,6 +56,18 @@ public class GlobalMonitor {
 
 	/////Methods to observe Global State/////
 	
+	//Get overCommitMem, MBs
+	public double getOverUtil(double upperBound){
+		double over=0;
+		ArrayList<VM> aboveMax=getAboveMax(upperBound);
+		for (VM vm : aboveMax)
+		{
+			over+= ((vm.getMemUtil()-upperBound)*vm.getRAM());
+		}
+		over=(over*1.0)/aboveMax.size();
+		return over;
+		
+	}
 	
 	//Return VMs above upperBound utilization(ascending)
 	//upperBound: threshold on max util, k window size for running median
@@ -84,7 +96,12 @@ public class GlobalMonitor {
 	//Return cumulative cost
 	public double getTotalCost() {
 		return totalCost;
-	}	
+	}
+	
+	public double getCostPerDay(){
+		double days= (time*1.0)/(60*24*1.0);
+		return (totalCost)/days;
+	}
 
 	//Get number of migrations
 	public int getNumMigrations(){

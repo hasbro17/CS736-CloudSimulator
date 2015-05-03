@@ -1,4 +1,9 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -11,7 +16,7 @@ public class DriverMain {
 	//Set Median Window size, can be changed at any given point to get fast or slow moving median
 	public static int MEDIANWINDOW=1;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		//init Logger
 		Logger logger = Logger.getLogger("DriverLog");
@@ -44,6 +49,29 @@ public class DriverMain {
 		//Attach global object to policy
 		policy.setGlobal(global);
 		
+		
+		//Init buffered writers for graph outputs
+		//Cost: 
+		//time Cost/day
+		File fout = new File("Cost.txt");
+		FileOutputStream fos = new FileOutputStream(fout);
+		BufferedWriter bwCost = new BufferedWriter(new OutputStreamWriter(fos));
+		
+		//Num Migrations: 
+		//time NumMigrations
+		fout = new File("NumMigrations.txt");
+		fos = new FileOutputStream(fout);
+		BufferedWriter bwMigrations = new BufferedWriter(new OutputStreamWriter(fos));
+		
+		//Average Overutilization
+		fout = new File("OverUtil.txt");
+		fos = new FileOutputStream(fout);
+		BufferedWriter bwAVOverUtil = new BufferedWriter(new OutputStreamWriter(fos));
+		
+		
+		
+		
+		
 
 		//Initialize the state of global
 		//Start off with 1 smallest VM maybe?
@@ -66,7 +94,19 @@ public class DriverMain {
 			
 			//Policy to adjust global state
 			policy.adjust();
-			//logger.info(policy.toString());
+			
+			
+			
+			//Log graph values
+			//Cost
+			bwCost.write(String.valueOf(global.getCostPerDay()));
+			bwCost.newLine();
+			//Num Migrations
+			bwMigrations.write(global.getNumMigrations());
+			bwMigrations.newLine();
+			//AverageOverUtil
+			global.getAboveMax(1);//Above 100% VMs
+			
 			
 		}
 	
