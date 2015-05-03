@@ -31,6 +31,7 @@
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 public class MultiProcessMemoryBestFitPolicy implements Policy {
 
@@ -94,9 +95,13 @@ private GlobalMonitor global;
 	}
 	
 	private void removeEmptyVMs() {
-		for (VM vm : global.getLocalMonitors()) {
-			if (vm.getMemUtil() == 0) { // equal to zero
-				global.removeVM(vm.getVMID());
+		Iterator<VM> iterator = global.getLocalMonitors().iterator();
+		VM vm;
+		while (iterator.hasNext()) {
+			vm = iterator.next();
+			if (vm.getMemUtil() == 0) { // equal to zero??
+				iterator.remove();
+				//global.removeVM(vm.getVMID());
 			}
 		}
 	}
@@ -107,7 +112,7 @@ private GlobalMonitor global;
 		int i=0;
 		for (VM src : belowMin) {
 			// Choose all processes from VM until it is empty
-			while (src.getMemUtil() > 0) {
+			while (src.getMemUtil() > 0 && i < src.getMemOrderedProcs().size()) {
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 	
 				//Find dst VM from existing VMs for this process
@@ -117,8 +122,12 @@ private GlobalMonitor global;
 					leftoverProcs.add(toMigrate);
 					//previousProc = toMigrate;
 				}
+				else {
+					global.migrateProc(toMigrate.getPID(), src.getVMID(), dstVM.getVMID());
+				}
 				i++;
 			}
+			i = 0;
 		}
 		return leftoverProcs;
 		
@@ -188,7 +197,7 @@ private GlobalMonitor global;
 		for (VM src : outsideBounds) {
 			// TODO Choose largest/smallest processes from VM until the threshold is satisfied based on a flag
 			//Proc toMigrate=src.getMemOrderedProcs().get(0);
-			while (src.getMemUtil() > max && i < src.getMemOrderedProcs().size()) {
+			while (src.getMemUtil() > (max*src.getRAM()) && i < src.getMemOrderedProcs().size()) {
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 	
 				//Find dst VM from existing VMs for this process
@@ -197,6 +206,9 @@ private GlobalMonitor global;
 				if (dstVM == null) {
 					leftoverProcs.add(toMigrate);
 					//previousProc = toMigrate;
+				}
+				else {
+					global.migrateProc(toMigrate.getPID(), src.getVMID(), dstVM.getVMID());
 				}
 				i++;
 			}
@@ -215,7 +227,7 @@ private GlobalMonitor global;
 			if (currentVMSet.contains(vm))
 				continue;
 			newMemUsage = vm.getMemUtil() + toMigrate.getMemUsage();
-			if (newMemUsage < max && memLeft < vm.getRAM() - newMemUsage) {
+			if (newMemUsage < (max*vm.getRAM()) && memLeft > vm.getRAM() - newMemUsage) {
 				targetVM = vm;
 				memLeft = vm.getRAM() - newMemUsage;
 			}
@@ -229,7 +241,7 @@ private GlobalMonitor global;
 	private VM getFirstUnderutilizedExistingVM(Proc p) {
 		ArrayList<VM> vms = global.getLocalMonitors();
 		for (VM vm : vms) {
-			if (vm.getMemUtil() < max)
+			if (vm.getMemUtil() < (max*vm.getRAM()))
 				return vm;
 		}
 		// no VM exists with less than max utilization
