@@ -62,6 +62,9 @@ public class Resource {
 		if(scnr.hasNextLine()){
 			currentUsage=scnr.nextDouble();
 			scnr.nextLine();//clear line
+			
+			if(!scnr.hasNextLine())
+				finished=true;
 		}
 		else{//trace finished
 			finished=true;

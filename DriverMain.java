@@ -42,7 +42,8 @@ public class DriverMain {
 		logger.info("initVMTypes done!");
 		
 		//Create policy object
-		Policy policy = new PerProcessBestFitPolicy(0.8, 0.2);
+		//Policy policy = new PerProcessBestFitPolicy(0.8, 0.2);
+		Policy policy = new MultiProcessMemoryBestFitPolicy(0.8, 0.2);
 		
 		GlobalMonitor global = new GlobalMonitor();
 		
