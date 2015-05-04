@@ -56,6 +56,9 @@ public class VM {
 		return (getRawMemUtil()+demand)/(RAM*1024) < upBound;
 	}
 
+	public double getHourlyRate(){
+		return hourlyRate;
+	}
 
 	public int getvCPU() {
 		return vCPU;
@@ -200,7 +203,7 @@ public class VM {
 		result+="\tVMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + " MemUtil : "+this.getMemUtil() + "\n";
 		//result.append("VMID : " + this.vmID + " type : " + this.instanceName + " time : " + this.time + "\n");
 		for (Proc proc:procs) {
-			result+="\t\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + "\n";
+			result+="\t\tPID: " + proc.getPID() + " CPU usage: " + proc.getCPUUsage() + " Mem usage: " + proc.getMemUsage() + " dayMigs:"+proc.getDayMigs() + "\n";
 		}
 		result+="\t=========================================\n";
 		return result.toString();

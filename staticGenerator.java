@@ -40,14 +40,14 @@ public class staticGenerator {
 	private static final int distanceMultiplier = 500;  
 	
 	public static void main(String[] args) throws IOException{
-			double mean=400;
+			double mean=600;
 			File fout = new File("trace-static-m"+mean+".txt");
 			FileOutputStream fos = new FileOutputStream(fout);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 			double demand;
 			staticGenerator gen1 = new staticGenerator(mean);
 //			System.out.println("Initial Demand: " + gen1.currentDemand);
-		for(int i=0; i < 120; i++) {
+		for(int i=0; i < (3*24*60); i++) {
 			demand = gen1.generator();
 //			if(demand>1 | demand<0)
 //				System.out.println("ERROR!! Demand: " + demand + " iteration: " +i);

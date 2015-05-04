@@ -14,6 +14,25 @@ public class Proc {
 	private Resource cpu;
 	private Resource mem;
 	private int srcVMID;
+	
+	private int dayMigs;
+	private int totalMigs;
+	//Counter to keep track of time elapsed in a day
+	private int timeCounter;
+	
+	public void incMigrations(){
+		dayMigs++;
+		totalMigs++;
+	}
+	
+	public boolean isAboveMigLimit(){
+		return dayMigs > DriverMain.migPerDayLimit;
+	}
+	
+	//Get num migrations of day
+	public int getDayMigs(){
+		return dayMigs;
+	}
 
 	public int getSrcVMID() {
 		return srcVMID;
@@ -28,6 +47,8 @@ public class Proc {
 		this.pid=PID;
 		PID++;
 		time=0;
+		timeCounter=0;
+		dayMigs=0;
 		cpu = new Resource(cpuTypeFile);
 		mem = new Resource(memTypeFile);
 	}
@@ -37,6 +58,14 @@ public class Proc {
 		cpu.computeNextStep();
 		mem.computeNextStep();
 		time++;
+		timeCounter++;
+		
+		//Check and rest day counter and migrations in a day
+		if(timeCounter>=GlobalMonitor.ONEDAY){
+			timeCounter=0;
+			dayMigs=0;
+		}
+		
 	}
 	
 	//check if process finished, both mem and cpu traces

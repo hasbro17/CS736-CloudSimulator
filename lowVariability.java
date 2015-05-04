@@ -68,14 +68,14 @@ public class lowVariability {
 	
 	public static void main(String[] args) throws IOException {
 			double mean = 800;
-			File fout = new File("trace-slow-m"+mean+".txt");
+			File fout = new File("trace-slow-m"+mean+"-mb"+meanBound+".txt");
 			FileOutputStream fos = new FileOutputStream(fout);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 			double demand;
 			
 			lowVariability gen1 = new lowVariability(mean);
 //			System.out.println("Initial Demand: " + gen1.currentDemand);
-		for(int i=0; i < 120; i++) {
+		for(int i=0; i < (3*24*60); i++) {
 			demand = gen1.generator();
 //			if(demand>2*mean | demand<0)
 //				System.out.println("ERROR!! Demand: " + demand + " iteration: " +i);

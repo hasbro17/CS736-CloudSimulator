@@ -53,10 +53,19 @@ public class PerProcessBestFitPolicy implements Policy {
 		for (VM src : outsideBounds) {
 			//Choose process from this VM, in this case only one
 			Proc toMigrate=src.getMemOrderedProcs().get(0);
+			
+			//Don't migrate if above daily migration limit
+			if(toMigrate.isAboveMigLimit())
+				continue;
 
 			//Find dst VM for this process
 			//In this case, get the type of the new VM
 			VMTypes dstType=getTargetVM(toMigrate,src);
+			
+			//If global cost for the day does not stay below limit with this addition
+			if(dstType!=null && !global.staysBelowLimit(dstType.getHourlyRate(), src.getHourlyRate()) ){
+				dstType=null;
+			}
 
 			//If dst found then migrate proc to new VM and close down old one
 			if(dstType!=null)

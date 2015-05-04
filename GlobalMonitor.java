@@ -13,12 +13,21 @@ public class GlobalMonitor {
 	public ArrayList<VM> getLocalMonitors() {
 		return localMonitors;
 	}
+	
+	//Minutes in a day, limit for timeCounters
+	public static final int ONEDAY=24*60;
 
 	//Total cost accumulated from running VM's since beginning
 	private double totalCost;
 	private int numMigrations;
 	//Time steps in minutes since VM running
 	private int time;
+	
+	//Counter to keep track of time elapsed in a day
+	private int timeCounter;
+	//Cost accumulated for the day
+	private double dayCost;
+
 	
 	private Logger logger = Logger.getLogger("GlobalMonitorLog");
 	FileHandler fh;
@@ -43,28 +52,63 @@ public class GlobalMonitor {
 		localMonitors=new ArrayList<VM>();
 		totalCost=0;
 		numMigrations=0;
+		dayCost=0;
 		initLogger();
 	}
 
 	//Compute one time step for all VM instances and update totalCost
 	public void computeNextStep(){
+		double stepCost=0;
 		for (VM vm : localMonitors) {
-			totalCost+=vm.computeNextStep();
+			stepCost+=vm.computeNextStep();
 		}
+		totalCost+=stepCost;
+		dayCost+=stepCost;
 		time++;
+		timeCounter++;
+		
+		//Check and rest day counter and accumulated cost per day
+		if(timeCounter>=ONEDAY){
+			timeCounter=0;
+			dayCost=0;
+		}
+	}
+	
+	//Returns projected cost at the end of the day
+	public double projectDayCost(){
+		double netHourlyRate=0;
+		for (VM vm : localMonitors) {
+			netHourlyRate+=vm.getHourlyRate();
+		}
+		double timeRem=((ONEDAY-timeCounter)*1.0)/60;
+		double projectedCost=timeRem*netHourlyRate;
+		return projectedCost+dayCost;
+	}
+	
+	//Checks if projected cost stays below the limit
+	//after the additional hourly rate cost, and the removal of an hourly rate
+	public boolean staysBelowLimit(double addHourlyRate, double remHourlyRate){
+		double newCost= (addHourlyRate - remHourlyRate)*(((ONEDAY-timeCounter)*1.0)/60);
+		if( (newCost+projectDayCost()) > DriverMain.costPerDayLimit )
+			return false;
+		else
+			return true;
+	}
+	
+	public int getTime(){
+		return time;
 	}
 
 	/////Methods to observe Global State/////
 	
 	//Get overCommitMem, MBs
-	public double getOverUtil(double upperBound){
+	public double getOverCommit(double upperBound){
 		double over=0;
 		ArrayList<VM> aboveMax=getAboveMax(upperBound);
 		for (VM vm : aboveMax)
 		{
-			over+= ((vm.getMemUtil()-upperBound)*vm.getRAM());
+			over+= ((vm.getMemUtil()-upperBound)*vm.getRAM()*1024*1.0);
 		}
-		over=(over*1.0)/aboveMax.size();
 		return over;
 		
 	}
@@ -203,6 +247,7 @@ public class GlobalMonitor {
 
 		//Increment migrations counter
 		numMigrations++;
+		toMigrate.incMigrations();
 		logger.info(this.toString());
 		return true;
 	}
@@ -210,7 +255,7 @@ public class GlobalMonitor {
 	public String toString() {
 		String result = "";
 		//result+="\n=================================================\n";
-		result+="Global State at" + " time : " + this.time + " total cost : " + totalCost + " migrations : " + numMigrations + "\n";
+		result+="Global State at" + " time : " + this.time + " total cost : " + totalCost + " dayTime:"+timeCounter +" dayCost:"+dayCost + " migrations : " + numMigrations + "\n";
 		for (VM vm:localMonitors) {
 			result+=vm.toString();
 			//result+="\tVMID : " + vm.getVMID() + " type : " + vm.getInstanceName() + " num procs : " + vm.getNumProcs() + " cost: " + vm.getTotalCost() + "\n";

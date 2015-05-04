@@ -15,6 +15,10 @@ public class DriverMain {
 	//To be changed by policies
 	//Set Median Window size, can be changed at any given point to get fast or slow moving median
 	public static int MEDIANWINDOW=1;
+	
+	//User constraints
+	public static double costPerDayLimit=10;//Dollars
+	public static int migPerDayLimit=20;
 
 	public static void main(String[] args) throws IOException {
 		
@@ -42,8 +46,8 @@ public class DriverMain {
 		logger.info("initVMTypes done!");
 		
 		//Create policy object
-		//Policy policy = new PerProcessBestFitPolicy(0.8, 0.2);
-		Policy policy = new MultiProcessMemoryBestFitPolicy(0.8, 0.2);
+		Policy policy = new PerProcessBestFitPolicy(1, 0.2);
+		//Policy policy = new MultiProcessMemoryBestFitPolicy(0.8, 0.2);
 		
 		GlobalMonitor global = new GlobalMonitor();
 		
@@ -65,9 +69,9 @@ public class DriverMain {
 		BufferedWriter bwMigrations = new BufferedWriter(new OutputStreamWriter(fos));
 		
 		//Average Overutilization
-		fout = new File("OverUtil.txt");
+		fout = new File("OverCommit.txt");
 		fos = new FileOutputStream(fout);
-		BufferedWriter bwAVOverUtil = new BufferedWriter(new OutputStreamWriter(fos));
+		BufferedWriter bwOverCommit = new BufferedWriter(new OutputStreamWriter(fos));
 		
 		
 		
@@ -93,20 +97,31 @@ public class DriverMain {
 			global.computeNextStep();
 			logger.info(global.toString());
 			
-			//Policy to adjust global state
-			policy.adjust();
-			
 			
 			
 			//Log graph values
 			//Cost
-			bwCost.write(String.valueOf(global.getCostPerDay()));
+			bwCost.write(String.valueOf(global.getTotalCost()));
 			bwCost.newLine();
+			bwCost.flush();
 			//Num Migrations
-			bwMigrations.write(global.getNumMigrations());
+			bwMigrations.write(String.valueOf(global.getNumMigrations()));
 			bwMigrations.newLine();
-			//AverageOverUtil
-			global.getAboveMax(1);//Above 100% VMs
+			bwMigrations.flush();
+			MEDIANWINDOW=1;
+			//Total Overcommit
+			bwOverCommit.write(String.valueOf(global.getOverCommit(1)));
+			bwOverCommit.newLine();
+			bwOverCommit.flush();
+			
+			//logger.info(global.getTime()+"Mihir");
+			
+			
+			//Reset Median Window
+			
+			
+			//Policy to adjust global state
+			policy.adjust();
 			
 			
 		}
