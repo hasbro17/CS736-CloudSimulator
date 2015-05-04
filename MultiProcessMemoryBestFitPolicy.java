@@ -115,6 +115,12 @@ private GlobalMonitor global;
 			// Choose all processes from VM until it is empty
 			while (src.getMemUtil() > 0 && i < src.getMemOrderedProcs().size()) {
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
+				
+				//Don't migrate if above daily migration limit
+				if(toMigrate.isAboveMigLimit()){
+					i++;
+					continue;
+				}
 	
 				//Find dst VM from existing VMs for this process
 				VM dstVM=getExistingTargetVM(toMigrate,belowMin);
@@ -141,8 +147,17 @@ private GlobalMonitor global;
 		
 		for (Proc proc : leftovers) {
 			VM dstVM=getExistingTargetVM(proc,new ArrayList<VM>());
+			
+			
 			if (dstVM == null) {
 				for (VMTypes type : memOrderedTypes) {
+					
+					//skip over VM types that drive the day cost above the limit
+					//If global cost for the day does not stay below limit with new VM
+					if(!global.staysBelowLimit(type.getHourlyRate(), 0) ){
+						continue;
+					}
+					
 					//Can directly check from type without creating a new VM
 					if(type.isBelowMax(proc.getMemUsage(), max)) {
 						dstVM = global.createVM(type);
@@ -227,6 +242,10 @@ private GlobalMonitor global;
 			while (src.getMemUtil() > max && i < src.getMemOrderedProcs().size()) {
 				
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
+				
+				//Don't migrate if above daily migration limit
+				if(toMigrate.isAboveMigLimit())
+					continue;
 	
 				//Find dst VM from existing VMs for this process
 				VM dstVM=getExistingTargetVM(toMigrate,outsideBounds);
@@ -250,6 +269,7 @@ private GlobalMonitor global;
 		double memLeft = Double.MAX_VALUE;
 		VM targetVM = null;
 		for (VM vm : global.getLocalMonitors()) {
+			
 			// Skip over VMs that are above/below threshold
 			if (currentVMSet.contains(vm))
 				continue;

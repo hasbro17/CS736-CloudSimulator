@@ -101,6 +101,9 @@ public class GlobalMonitor {
 
 	/////Methods to observe Global State/////
 	
+	//Get MemUtil of all VM Ids. 0 for shutdown or non existing VMs
+	
+	
 	//Get overCommitMem, MBs
 	public double getOverCommit(double upperBound){
 		double over=0;
@@ -109,8 +112,17 @@ public class GlobalMonitor {
 		{
 			over+= ((vm.getMemUtil()-upperBound)*vm.getRAM()*1024*1.0);
 		}
-		return over;
-		
+		return over;	
+	}
+	
+	public double getTotalUnused(){
+		double free=0;
+		for (VM vm : localMonitors)
+		{
+			if(vm.getMemUtil()<1)
+				free+= ((1-vm.getMemUtil())*vm.getRAM()*1024*1.0);
+		}
+		return free;	
 	}
 	
 	//Return VMs above upperBound utilization(ascending)
