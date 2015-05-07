@@ -15,10 +15,12 @@ public class DriverMain {
 	//To be changed by policies
 	//Set Median Window size, can be changed at any given point to get fast or slow moving median
 	public static int MEDIANWINDOW=1;
+	
+	public static int MAXVMID=60;
 
 	//User constraints
-	public static double costPerDayLimit=10;//Dollars
-	public static int migPerDayLimit=20;
+	public static double costPerDayLimit=100;//Dollars
+	public static int migPerDayLimit=6;
 
 	public static void main(String[] args) throws IOException {
 
@@ -46,8 +48,8 @@ public class DriverMain {
 		logger.info("initVMTypes done!");
 
 		//Create policy object
-		//Policy policy = new PerProcessBestFitPolicy(1, 0.2);
-		Policy policy = new MultiProcessMemoryBestFitPolicy(1, 0.2);
+		Policy policy = new PerProcessBestFitPolicy(1, 0.2);
+		//Policy policy = new MultiProcessMemoryBestFitPolicy(1, 0.2);
 
 		GlobalMonitor global = new GlobalMonitor();
 
@@ -124,14 +126,18 @@ public class DriverMain {
 			bwOverCommit.write(String.valueOf(global.getOverCommit(1)));
 			bwOverCommit.newLine();
 			bwOverCommit.flush();
-			
+	
 			//Total Unused
 			bwUnused.write(String.valueOf(global.getTotalUnused()));
 			bwUnused.newLine();
 			bwUnused.flush();
 			
-			//Timeline: VM Utilizations
+			//VM Time line, Mem utils
+			bwVMUtils.write(String.valueOf(global.getTLMemUtil(MAXVMID)));
+			bwVMUtils.newLine();
+			bwVMUtils.flush();
 			
+			MEDIANWINDOW=1;			
 			
 			
 

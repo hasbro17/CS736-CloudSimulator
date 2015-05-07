@@ -244,8 +244,11 @@ private GlobalMonitor global;
 				Proc toMigrate=src.getMemOrderedProcs().get(i);
 				
 				//Don't migrate if above daily migration limit
-				if(toMigrate.isAboveMigLimit())
+				if(toMigrate.isAboveMigLimit()){
+					i++;
 					continue;
+				}
+					
 	
 				//Find dst VM from existing VMs for this process
 				VM dstVM=getExistingTargetVM(toMigrate,outsideBounds);

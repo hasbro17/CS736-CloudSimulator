@@ -1,3 +1,6 @@
-0 trace-custom-rapid.txt trace-custom-rapid.txt
-5 trace-custom-rapid.txt trace-custom-rapid.txt
-5 trace-custom-rapid.txt trace-custom-rapid.txt
+0 trace-fast-m800-mb50.txt trace-fast-m800-mb50.txt
+0 trace-fast-m1600-mb50.txt trace-fast-m1600-mb50.txt
+0 trace-slow-m800.0-mb30.txt trace-slow-m800.0-mb30.txt
+0 trace-slow-m1600.0-mb30.txt trace-slow-m1600.0-mb30.txt
+0 trace-static-m600.0.txt trace-static-m600.0.txt
+0 trace-static-m1600.0.txt trace-static-m1600.0.txt

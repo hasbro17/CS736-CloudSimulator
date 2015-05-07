@@ -13,7 +13,7 @@ public class GlobalMonitor {
 	public ArrayList<VM> getLocalMonitors() {
 		return localMonitors;
 	}
-	
+
 	//Minutes in a day, limit for timeCounters
 	public static final int ONEDAY=24*60;
 
@@ -22,13 +22,13 @@ public class GlobalMonitor {
 	private int numMigrations;
 	//Time steps in minutes since VM running
 	private int time;
-	
+
 	//Counter to keep track of time elapsed in a day
 	private int timeCounter;
 	//Cost accumulated for the day
 	private double dayCost;
 
-	
+
 	private Logger logger = Logger.getLogger("GlobalMonitorLog");
 	FileHandler fh;
 	SimpleFormatter formatter = new SimpleFormatter();
@@ -66,14 +66,14 @@ public class GlobalMonitor {
 		dayCost+=stepCost;
 		time++;
 		timeCounter++;
-		
+
 		//Check and rest day counter and accumulated cost per day
 		if(timeCounter>=ONEDAY){
 			timeCounter=0;
 			dayCost=0;
 		}
 	}
-	
+
 	//Returns projected cost at the end of the day
 	public double projectDayCost(){
 		double netHourlyRate=0;
@@ -84,7 +84,7 @@ public class GlobalMonitor {
 		double projectedCost=timeRem*netHourlyRate;
 		return projectedCost+dayCost;
 	}
-	
+
 	//Checks if projected cost stays below the limit
 	//after the additional hourly rate cost, and the removal of an hourly rate
 	public boolean staysBelowLimit(double addHourlyRate, double remHourlyRate){
@@ -94,16 +94,35 @@ public class GlobalMonitor {
 		else
 			return true;
 	}
-	
+
 	public int getTime(){
 		return time;
 	}
 
 	/////Methods to observe Global State/////
-	
+
 	//Get MemUtil of all VM Ids. 0 for shutdown or non existing VMs
-	
-	
+	public String getTLMemUtil(int maxVMId){
+		String str="";
+		for(int i=1; i<=maxVMId; i++)
+		{
+			VM vm=null;
+			for (VM v : localMonitors) {
+				if(v.getVMID()==i){
+					vm=v;
+					break;
+				}
+			}
+			if(vm!=null){
+				str+=vm.getMemUtil()+"\t";
+			}
+			else{
+				str+=0+"\t";
+			}
+		}
+		return str;
+	}
+
 	//Get overCommitMem, MBs
 	public double getOverCommit(double upperBound){
 		double over=0;
@@ -114,7 +133,7 @@ public class GlobalMonitor {
 		}
 		return over;	
 	}
-	
+
 	public double getTotalUnused(){
 		double free=0;
 		for (VM vm : localMonitors)
@@ -124,7 +143,7 @@ public class GlobalMonitor {
 		}
 		return free;	
 	}
-	
+
 	//Return VMs above upperBound utilization(ascending)
 	//upperBound: threshold on max util, k window size for running median
 	public ArrayList<VM> getAboveMax(double upperBound){
@@ -136,7 +155,7 @@ public class GlobalMonitor {
 		Collections.sort(aboveMax, VM.memCompare);
 		return aboveMax;
 	}
-	
+
 	//Return VMs below lowerBound utilization(ascending)
 	//lowerBound: threshold on min util, k window size for running median
 	public ArrayList<VM> getBelowMin(double lowerBound){
@@ -148,12 +167,12 @@ public class GlobalMonitor {
 		Collections.sort(belowMin, VM.memCompare);
 		return belowMin;
 	}
-	
+
 	//Return cumulative cost
 	public double getTotalCost() {
 		return totalCost;
 	}
-	
+
 	public double getCostPerDay(){
 		double days= (time*1.0)/(60*24*1.0);
 		return (totalCost)/days;
@@ -163,7 +182,7 @@ public class GlobalMonitor {
 	public int getNumMigrations(){
 		return numMigrations;
 	}
-	
+
 
 	//VMs ordered by rawCPUUsage
 	public ArrayList<VM> getRawCPUOrder(){
