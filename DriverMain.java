@@ -23,6 +23,8 @@ public class DriverMain {
 	public static int migPerDayLimit=6;
 
 	public static void main(String[] args) throws IOException {
+		
+		ArrayList<Double> overCommitValues = new ArrayList<Double>(); 
 
 		//init Logger
 		Logger logger = Logger.getLogger("DriverLog");
@@ -70,6 +72,7 @@ public class DriverMain {
 		fos = new FileOutputStream(fout);
 		BufferedWriter bwMigrations = new BufferedWriter(new OutputStreamWriter(fos));
 
+		
 		//Total OverCommit
 		fout = new File("OverCommit.txt");
 		fos = new FileOutputStream(fout);
@@ -121,12 +124,15 @@ public class DriverMain {
 			bwMigrations.write(String.valueOf(global.getNumMigrations()));
 			bwMigrations.newLine();
 			bwMigrations.flush();
+
 			MEDIANWINDOW=1;
+
+			overCommitValues.add(global.getOverCommit(1));
 			//Total Overcommit
 			bwOverCommit.write(String.valueOf(global.getOverCommit(1)));
 			bwOverCommit.newLine();
 			bwOverCommit.flush();
-	
+			
 			//Total Unused
 			bwUnused.write(String.valueOf(global.getTotalUnused()));
 			bwUnused.newLine();
@@ -136,6 +142,7 @@ public class DriverMain {
 			bwVMUtils.write(String.valueOf(global.getTLMemUtil(MAXVMID)));
 			bwVMUtils.newLine();
 			bwVMUtils.flush();
+			
 			
 			MEDIANWINDOW=1;			
 			
@@ -149,9 +156,22 @@ public class DriverMain {
 
 			//Policy to adjust global state
 			policy.adjust();
-
-
 		}
+		
+		double avgOverCommit=0;
+		int num=0;
+		for (Double double1 : overCommitValues) {
+			if(double1>0){
+				num++;
+				avgOverCommit+=double1;
+			}
+		}
+		if(num!=0)
+			avgOverCommit=avgOverCommit*1.0/num;
+		
+		bwOverCommit.write(String.valueOf(avgOverCommit));
+		bwOverCommit.newLine();
+		bwOverCommit.flush();
 
 	}
 
